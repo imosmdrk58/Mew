@@ -24,11 +24,20 @@ export default function ChapterListCard({mangaID,chapters=[],email="", nextAuthU
     },[mangaID,email]);
     return (
         <div className="absolute left-0 right-0 bottom-0 pr-[10px] font-medium text-[13.6px]">
-                {chapters.length > 0 ? chapters.map((item,index) => (
-                    <div key={item.id} className={`pt-[10px] ${index === 2 && "hidden md:block"} border-b border-dashed border-gray-600 ${(readChapter.length > 0 ? (readChapter.some(read => read.chapterId === item.id) ? "text-gray-400 " : "text-[#FFD700]") : "text-[#FFD700]")}`}>
-                        <Link href={`/detailchapter/${mangaID}/${item.id}`}>Chapter {item.chapter}</Link>
-                    </div>
-                )) : "No chapters"}              
+            {Array.isArray(chapters) && chapters.length > 0 ? chapters.map((item, index) => (
+                <div
+                    key={item.id}
+                    className={`pt-[10px] ${index === 2 && "hidden md:block"} border-b border-dashed border-gray-600 ${
+                        readChapter.length > 0
+                            ? readChapter.some((read) => read.chapterId === item.id)
+                                ? "text-gray-400"
+                                : "text-[#FFD700]"
+                            : "text-[#FFD700]"
+                    }`}
+                >
+                    <Link href={`/detailchapter/${mangaID}/${item.id}`}>Chapter {item.chapter}</Link>
+                </div>
+            )) : "No chapters"}
         </div>
     );
 }

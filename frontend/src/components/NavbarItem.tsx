@@ -20,11 +20,8 @@ export default function NavbarItem(){
             {isMenuOpen && (       
             <nav className="lg:hidden absolute top-full left-0 w-full bg-[#2f2f2f] z-50 py-4 overflow-hidden transition-all duration-300 ease-in-out">
                 <div className="flex flex-col items-center space-y-4">
-                <Link href="/mangalist" className="text-[#FFD700] text-base font-medium lg:mr-7 mr-5 hover:text-[#CCB000]" onClick={toggleMenu}>UPDATES</Link>
                 <Link href="/mangalist" className="text-[#FFD700] text-base font-medium lg:mr-7 mr-5 hover:text-[#CCB000]" onClick={toggleMenu}>MANGA LIST</Link>
                 <Link href="/" className="text-[#FFD700] text-base font-medium lg:mr-7 mr-5 hover:text-[#CCB000]" onClick={toggleMenu}>FAVORITED</Link>
-                <Link href="/" className="text-[#FFD700] text-base font-medium lg:mr-7 mr-5 hover:text-[#CCB000]" onClick={toggleMenu}>ABOUT US</Link>
-                <Link href="/" className="text-[#FFD700] text-base font-medium lg:mr-7 mr-5 hover:text-[#CCB000]" onClick={toggleMenu}>CONTACT</Link>
                 </div>
             </nav>
             )}
