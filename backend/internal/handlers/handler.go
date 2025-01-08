@@ -1,58 +1,60 @@
 package handlers
 
 import (
+	"encoding/json"
 	"manga-api/internal/models"
 	"manga-api/internal/repository"
-
-	"manga-api/pkg/response"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"strconv"
 )
 
 type MangaHandler struct {
-	repo *repository.MangaRepository
+	Repo *repository.MangaRepository
 }
 
-func NewMangaHandler(db *gorm.DB) *MangaHandler {
-	return &MangaHandler{
-		repo: repository.NewMangaRepository(db),
-	}
+func NewMangaHandler(repo *repository.MangaRepository) *MangaHandler {
+	return &MangaHandler{Repo: repo}
 }
 
-func SetupRoutes(api *gin.RouterGroup, db *gorm.DB) {
-	handler := NewMangaHandler(db)
+// GetMangas fonksiyonu
+func (h *MangaHandler) GetMangas(w http.ResponseWriter, r *http.Request) {
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+	offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
 
-	api.POST("/manga", handler.Create)
-	api.GET("/manga", handler.List)
-}
-
-func (h *MangaHandler) Create(c *gin.Context) {
-	var manga models.Manga
-
-	if err := c.ShouldBindJSON(&manga); err != nil {
-		response.Error(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err := h.repo.Create(&manga); err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	response.Success(c, http.StatusCreated, "created", manga)
-}
-
-func (h *MangaHandler) List(c *gin.Context) {
-	mangas, err := h.repo.FindAll()
+	mangas, err := h.Repo.FindAll(limit, offset)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	response.Success(c, http.StatusOK, "collection", gin.H{
-		"data":  mangas,
-		"total": len(mangas),
-	})
+	response := map[string]interface{}{
+		"result":   "ok",
+		"response": "collection",
+		"data":     mangas,
+		"limit":    limit,
+		"offset":   offset,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// CreateManga fonksiyonu
+func (h *MangaHandler) CreateManga(w http.ResponseWriter, r *http.Request) {
+	var manga models.Manga
+	err := json.NewDecoder(r.Body).Decode(&manga)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = h.Repo.Create(&manga)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(manga)
 }

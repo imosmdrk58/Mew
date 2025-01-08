@@ -122,20 +122,21 @@ export async function fetchManga(
       }${queryFilter !== "" ? `&${queryFilter}` : ""}`
     );
 
-    console.log("Response: ", res);
     // const mangas = await res.json();
     if (!res.ok) {
       return { mangas: [], allChapters: [], coverArts: [], totalManga: 0 };
     }
     const result = await res.json();
-    console.log("Result: ", result);
+
     const totalManga = result.total;
     const mangas = result.data.sort(
       (a, b) =>
         new Date(b.attributes.updatedAt).getTime() -
         new Date(a.attributes.updatedAt).getTime()
     );
-    const promises = mangas.map((manga) => fetchLatestChapterManga(manga.id));
+    const promises = mangas.map((manga) => {
+      fetchLatestChapterManga(manga.id);
+    });
     const allChapters = await Promise.all(promises);
     const promisesTwo = mangas.map((manga) => fetchCoverMangas(manga.id));
     const coverArts = await Promise.all(promisesTwo);

@@ -2,30 +2,37 @@ package main
 
 import (
 	"log"
-	"manga-api/database"
 	"manga-api/internal/config"
+	"manga-api/internal/database"
 	"manga-api/internal/handlers"
+	"manga-api/internal/repository"
+	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	// Load configuration
-	cfg := config.Load()
+	cfg := config.LoadConfig()
 
-	// Initialize database
-	db, err := database.Initialize(cfg.DatabaseURL)
+	db, err := database.ConnectDB(cfg)
 	if err != nil {
-		log.Fatal("Database connection failed:", err)
+		log.Fatalf("Could not connect to database: %v", err)
+	}
+	defer db.Close()
+
+	// Tabloyu oluştur
+	err = database.CreateMangaTable(db)
+	if err != nil {
+		log.Fatalf("Could not create manga table: %v", err)
 	}
 
-	// Initialize router
-	r := gin.Default()
+	mangaRepo := repository.NewMangaRepository(db)
+	mangaHandler := handlers.NewMangaHandler(mangaRepo)
 
-	// Setup routes
-	api := r.Group("/api")
-	handlers.SetupRoutes(api, db)
+	r := mux.NewRouter()
+	r.HandleFunc("/manga", mangaHandler.GetMangas).Methods("GET")
+	r.HandleFunc("/manga", mangaHandler.CreateManga).Methods("POST") // Yeni route
 
-	// Start server
-	r.Run(":8080")
+	log.Println("Server started on :8080")
+	log.Fatal(http.ListenAndServe(":8080", r))
 }

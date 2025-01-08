@@ -1,8 +1,15 @@
 package models
 
 type Manga struct {
-	ID          string `json:"id" gorm:"primaryKey"`
-	Title       string `json:"title" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	CreatedAt   string `json:"created_at"`
+	ID            string                 `json:"id"`
+	Type          string                 `json:"type"`
+	Attributes    map[string]interface{} `json:"attributes"`
+	Relationships []Relationship         `json:"relationships"`
+}
+
+type Relationship struct {
+	ID          string `json:"id"`
+	Type        string `json:"type"`
+	RelatedID   string `json:"related_id"`
+	RelatedType string `json:"related_type"`
 }
