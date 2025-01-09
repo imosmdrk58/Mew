@@ -1,17 +1,10 @@
-package repositories
+package manga
 
 import (
 	"database/sql"
 	"errors"
 )
 
-type Manga struct {
-	ID          int
-	Title       string
-	Description string
-	Status      string
-	CoverImage  string
-}
 
 type MangaRepository interface {
 	GetAllManga() ([]Manga, error)

@@ -1,4 +1,4 @@
-package handlers
+package manga
 
 import (
 	"encoding/json"
@@ -6,14 +6,13 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/melihaltin/manga-backend/internal/services"
 )
 
 type MangaHandler struct {
-	service services.MangaService
+	service MangaService
 }
 
-func NewMangaHandler(service services.MangaService) *MangaHandler {
+func NewMangaHandler(service MangaService) *MangaHandler {
 	return &MangaHandler{service: service}
 }
 
