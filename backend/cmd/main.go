@@ -2,37 +2,43 @@ package main
 
 import (
 	"log"
-	"manga-api/internal/config"
-	"manga-api/internal/database"
-	"manga-api/internal/handlers"
-	"manga-api/internal/repository"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/melihaltin/manga-backend/config"
+	"github.com/melihaltin/manga-backend/internal/db"
+	"github.com/melihaltin/manga-backend/internal/handlers"
+	"github.com/melihaltin/manga-backend/internal/repositories"
+	"github.com/melihaltin/manga-backend/internal/services"
 )
 
 func main() {
+	// Load configuration
 	cfg := config.LoadConfig()
 
-	db, err := database.ConnectDB(cfg)
+	// Connect to database
+	database, err := db.Connect(cfg)
 	if err != nil {
-		log.Fatalf("Could not connect to database: %v", err)
+		log.Fatalf("Database connection error: %v", err)
 	}
-	defer db.Close()
+	defer database.Close()
 
-	// Tabloyu oluştur
-	err = database.CreateMangaTable(db)
-	if err != nil {
-		log.Fatalf("Could not create manga table: %v", err)
-	}
+	// Initialize repositories
+	mangaRepo := repositories.NewMangaRepository(database)
 
-	mangaRepo := repository.NewMangaRepository(db)
-	mangaHandler := handlers.NewMangaHandler(mangaRepo)
+	// Initialize services
+	mangaService := services.NewMangaService(mangaRepo)
 
-	r := mux.NewRouter()
-	r.HandleFunc("/manga", mangaHandler.GetMangas).Methods("GET")
-	r.HandleFunc("/manga", mangaHandler.CreateManga).Methods("POST") // Yeni route
+	// Initialize handlers
+	mangaHandler := handlers.NewMangaHandler(mangaService)
 
-	log.Println("Server started on :8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	// Initialize router
+	router := mux.NewRouter()
+
+	// Register routes
+	mangaHandler.RegisterRoutes(router)
+
+	// Start server
+	log.Println("Starting server on port 8080...")
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
