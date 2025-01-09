@@ -27,13 +27,14 @@ export async function fetchLatestChapterManga(id) {
     return [];
   }
 }
+
 async function fetchAllChapter(id) {
   const respond = await fetch(
     `https://api.mangadex.org/manga/${id}/aggregate?translatedLanguage[]=en`
   );
   const result = await respond.json();
   const volumes = Object.values(result.volumes);
-
+  // console.log(volumes);
   let allChapter = [];
 
   for (let item in volumes) {
@@ -41,13 +42,16 @@ async function fetchAllChapter(id) {
       volume: volumes[item].volume,
       chapterArray: [],
     };
-    Object.values(volumes[item].chapters).map((chapter) =>
-      volumeObject.chapterArray.push(chapter)
-    );
+    Object.values(volumes[item].chapters).map((chapter) => {
+      volumeObject.chapterArray.push(chapter);
+      console.log(chapter);
+    });
     allChapter.push(volumeObject);
   }
+
   return allChapter;
 }
+
 async function fetchFileNames(id) {
   try {
     const response = await fetch(
@@ -92,6 +96,7 @@ export async function fetchCoverMangas(id) {
     return []; // Or handle the error differently (e.g., throw it for further handling)
   }
 }
+
 export async function fetchMostViewed() {
   const res = await fetch(
     "https://api.mangadex.org/manga?order[followedCount]=desc&availableTranslatedLanguage[]=en"
@@ -107,6 +112,7 @@ export async function fetchMostViewed() {
   const coverArtsMostView = await Promise.all(promisesTwo);
   return { mangaMostView, coverArtsMostView, allChaptersMostView };
 }
+
 export async function fetchManga(
   page = 1,
   limit = 10,
@@ -213,6 +219,7 @@ export async function fetchMangaWithID(id) {
   const coverArt = await fetchCoverManga(manga.id);
   return { manga, allChapters, coverArt };
 }
+
 export async function fetchFollowedMangasWithID(idArray) {
   const promises = idArray.map((id) => fetchLatestChapterManga(id));
   const allChapters = await Promise.all(promises);
@@ -254,6 +261,7 @@ export async function fetchFollowedMangasWithID(idArray) {
   //   return {mangas:[],allChapters:[],coverArts:[]};
   // }
 }
+
 export async function slideDescription(mangaDes) {
   let description;
   if (typeof mangaDes === `undefined`) {
@@ -329,6 +337,7 @@ export async function searchManga(searchTerm) {
   const coverArts = await Promise.all(promisesTwo);
   return { mangas, allChapters, coverArts };
 }
+
 export async function fetchAllReadChapter(
   email: string,
   mangaId: string,
@@ -375,6 +384,7 @@ export async function fetchTagFilterId(filterArray: Array<string>) {
     return []; // Return an empty array or handle it differently based on your use case
   }
 }
+
 export async function fetchTagFilterWithID(filterArray: Array<string>) {
   try {
     const respond = await fetch(`https://api.mangadex.org/manga/tag`);
@@ -392,6 +402,7 @@ export async function fetchTagFilterWithID(filterArray: Array<string>) {
     return [];
   }
 }
+
 export async function fetchMangasWithFilter(
   filters: { [key: string]: any },
   tagIDs: Array<string>
