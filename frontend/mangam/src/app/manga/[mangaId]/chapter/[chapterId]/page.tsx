@@ -12,15 +12,15 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 async function getChapter(mangaId: string, chapterId: string): Promise<Chapter | null> {
     const mockChapter: Chapter = {
-      id: (chapterId as unknown) as number,
+      chapter_id: parseInt(chapterId),
+      manga_id: parseInt(mangaId),
       title: "The Beginning",
-      number: 1,
-      uploadDate: new Date().toISOString(),
-      mangaId: mangaId,
-      images: [
-        { id: 1, url: "https://placehold.co/800x1200", page: 1 },
-        { id: 2, url: "https://placehold.co/800x1200", page: 2 },
-        { id: 3, url: "https://placehold.co/800x1200", page: 3 },
+      chapter_number: 1,
+      release_date: new Date().toISOString(),
+      pages: [
+        { page_id: 1, chapter_id:parseInt(chapterId),url: "https://placehold.co/800x1200", page_number: 1 },
+        { page_id: 2,chapter_id:parseInt(chapterId), url: "https://placehold.co/800x1200", page_number: 2 },
+        { page_id: 3, chapter_id:parseInt(chapterId),url: "https://placehold.co/800x1200", page_number: 3 },
       ],
       nextChapter: 2,
       prevChapter: undefined
@@ -122,15 +122,15 @@ if (isLoading) {
 
         {/* Chapter Images */}
         <div className="flex flex-col items-center space-y-0">
-          {chapter.images.map((image) => (
+          {chapter.pages.map((page) => (
             <div
-              key={image.id}
+              key={page.page_id}
               className="w-full relative"
             >
               {/* Once backend is ready, replace src with actual image URL */}
               <img
-                src={image.url}
-                alt={`Page ${image.page}`}
+                src={page.url}
+                alt={`Page ${page.page_number}`}
                 className="w-full h-auto"
                 loading="lazy"
               />

@@ -1,28 +1,44 @@
   
-  interface MangaDetail {
-    id: string;
+  interface Manga 
+  {
+    manga_id: number;
     title: string;
-    author: string;
-    coverImage: string;
     description: string;
+    cover_image_url: string;
     status: 'Ongoing' | 'Completed';
+    published_date: string;
+    last_updated: string;
     genres: string[];
     chapters: Chapter[];
   }
 
-  interface ChapterImage {
-    id: number;
+  interface Author
+  {
+    author_id: number;
+    name: string;
+    bio: string;
+  }
+
+  interface AuthorManga
+  {
+    author_id: number;
+    manga_id: number;
+  }
+
+  interface Page {
+    page_id: number;
+    chapter_id: number;
     url: string;
-    page: number;
+    page_number: number;
   }
   
   interface Chapter {
-    id: number;
+    chapter_id: number;
+    manga_id: number;
+    chapter_number: number;
     title: string;
-    number: number;
-    uploadDate: string;
-    images: ChapterImage[];
+    release_date: string;
+    pages: Page[];
     nextChapter?: number;
     prevChapter?: number;
-    mangaId: string;
   }

@@ -9,42 +9,94 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-async function fetchMangaDetail(mangaId: string): Promise<MangaDetail> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  return {
-    id: mangaId,
-    title: 'One Piece',
-    author: 'Eiichiro Oda',
-    coverImage: '/api/placeholder/350/500',
-    description: 'Follow Monkey D. Luffy and his pirate crew in their search for the ultimate treasure, the One Piece.',
-    status: 'Ongoing',
-    genres: ['Action', 'Adventure', 'Comedy', 'Fantasy'],
-    chapters: Array.from({ length: 20 }, (_, i) => ({
-      id: i + 1,
-      number: i + 1,
-      title: `Chapter ${i + 1}`,
-      uploadDate: new Date().toISOString(),
-      images: [],
-      mangaId: mangaId,
-    }))
-  };
+async function fetchMangaDetail(mangaId: string): Promise<Manga> {
+  try {
+    // API'den veriyi çek
+    const response = await fetch(`http://localhost:8080/manga/${mangaId}`);
+    
+    // Eğer cevap başarılı değilse hata fırlat
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // JSON verisini al
+    const data = await response.json();
+    console.log('API Response:', data); // API yanıtını logla
+
+    // API'den gelen veriyi Manga tipine dönüştür
+    const manga: Manga = {
+      manga_id: data.ID,
+      title: data.Title,
+      description: data.Description,
+      cover_image_url: data.CoverImage,
+      status: data.Status,
+      published_date: new Date().toISOString(), // Örnek tarih, API'den gelmiyorsa
+      last_updated: new Date().toISOString(), // Örnek tarih, API'den gelmiyorsa
+      genres: [], // API'den gelmiyorsa boş bırak
+      chapters: Array.from({ length: 20 }, (_, i) => ({
+        chapter_id: i + 1,
+        manga_id: data.ID,
+        chapter_number: i + 1,
+        title: `Chapter ${i + 1}`,
+        release_date: new Date().toISOString(), // Örnek tarih
+        pages: [], // Boş sayfa listesi
+        nextChapter: i < 19 ? i + 2 : undefined,
+        prevChapter: i > 0 ? i : undefined,
+        mangaId: data.ID,
+      })),
+    };
+
+    return manga;
+  } catch (error) {
+    console.error('Error fetching manga details:', error);
+    throw error; // Hata durumunda hatayı fırlat
+  }
 }
 
 export default function MangaDetail({ params }: { params: { mangaId: string } }) {
 
   // Mock data (remove when backend is ready)
+  const [manga, setManga] = useState<Manga | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [resolvedParams, setResolvedParams] = useState<{ mangaId: string; } | null>(null);
+
+    useEffect(() => {
+        const resolveParams = async () => {
+          const unwrappedParams = await params;
+          setResolvedParams(unwrappedParams);
+        };
+        resolveParams();
+      }, [params]);
+    
+      useEffect(() => {
+        if (!resolvedParams) return;
   
-  const manga = use(fetchMangaDetail(params.mangaId));
+        const fetchChapter = async () => {
+          try {
+            const mangaData = await fetchMangaDetail(resolvedParams.mangaId);
+            setManga(mangaData);
+          } catch (error) {
+            console.error('Failed to fetch chapter:', error);
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        fetchChapter();
+      }, [resolvedParams]);
+
+      if (!resolvedParams || isLoading) {
+        return <div>Loading...</div>;
+      }
   
 
   if (!manga) {
     return <div>Manga not found</div>;
   }
-
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 mt-16">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left Column - Cover Image */}
         <div className="md:col-span-1">
@@ -52,7 +104,7 @@ export default function MangaDetail({ params }: { params: { mangaId: string } })
             <CardContent className="p-4">
               <div className="relative aspect-[2/3] w-full">
                 <Image
-                  src={manga.coverImage}
+                  src={manga.cover_image_url}
                   alt={manga.title}
                   fill
                   className="object-cover rounded-lg"
@@ -72,7 +124,7 @@ export default function MangaDetail({ params }: { params: { mangaId: string } })
               <div className="flex items-center gap-2 mb-4">
                 <User className="w-4 h-4" />
                 <span className="text-sm text-gray-600">
-                  by {manga.author}
+                  by Hexapawa{/* by {manga.author} */}
                 </span>
               </div>
 
@@ -102,18 +154,18 @@ export default function MangaDetail({ params }: { params: { mangaId: string } })
                 <div className="space-y-2">
                   {manga.chapters.map((chapter) => (
                     <Link
-                      key={chapter.id}
-                      href={`/manga/${manga.id}/chapter/${chapter.number}`}
+                      key={chapter.chapter_id}
+                      href={`/manga/${manga.manga_id}/chapter/${chapter.chapter_id}`}
                       className="block"
                     >
                       <Card>
                         <CardContent className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
                           <div>
                             <div className="font-medium">
-                              Chapter {chapter.number}
+                              Chapter {chapter.chapter_number}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {new Date(chapter.uploadDate).toLocaleDateString()}
+                              {new Date(chapter.release_date).toLocaleDateString()}
                             </div>
                           </div>
                           <ChevronRight className="w-4 h-4 text-gray-400" />
