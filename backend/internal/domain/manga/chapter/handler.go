@@ -9,6 +9,7 @@ import (
 )
 
 type ChapterHandler interface {
+	RegisterRoutes(router *mux.Router)
 	GetAllChapters(w http.ResponseWriter, r *http.Request)
 	GetChapterByID(w http.ResponseWriter, r *http.Request)
 	CreateChapter(w http.ResponseWriter, r *http.Request)
@@ -21,8 +22,6 @@ type chapterHandler struct {
 func NewChapterHandler(service ChapterService) ChapterHandler {
 	return &chapterHandler{service: service}
 }
-
-// register routes
 
 func (h *chapterHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/manga/{id}/chapters", h.GetAllChapters).Methods("GET")
