@@ -10,3 +10,8 @@ type User struct {
 	CreatedAt    time.Time `json:"created_at"`
 	IsAdmin      bool      `json:"is_admin"`
 }
+
+type LoginCredentials struct {
+	Username     string `json:"username"`
+	PasswordHash string `json:"password_hash"`
+}
