@@ -9,25 +9,29 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-async function fetchMangaDetail(mangaId: string): Promise<MangaDetail> {
+async function fetchMangaDetail(mangaId: string): Promise<Manga> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1000));
   
   return {
-    id: mangaId,
+    manga_id: parseInt(mangaId),
     title: 'One Piece',
-    author: 'Eiichiro Oda',
-    coverImage: '/api/placeholder/350/500',
     description: 'Follow Monkey D. Luffy and his pirate crew in their search for the ultimate treasure, the One Piece.',
+    cover_image_url: '/api/placeholder/350/500',
     status: 'Ongoing',
+    published_date: '2025-01-10T11:14:40+03:00',
+    last_updated: '2025-01-10T11:14:40+03:00',
     genres: ['Action', 'Adventure', 'Comedy', 'Fantasy'],
     chapters: Array.from({ length: 20 }, (_, i) => ({
-      id: i + 1,
-      number: i + 1,
+      chapter_id: i + 1,
+      manga_id: parseInt(mangaId),
+      chapter_number: i + 1,
       title: `Chapter ${i + 1}`,
-      uploadDate: new Date().toISOString(),
-      images: [],
-      mangaId: mangaId,
+      release_date: '2025-01-10T11:14:40+03:00',
+      pages: [],
+      nextChapter: i < 19 ? i + 2 : undefined,
+      prevChapter: i > 0 ? i : undefined,
+      mangaId: parseInt(mangaId)
     }))
   };
 }
@@ -44,7 +48,7 @@ export default function MangaDetail({ params }: { params: { mangaId: string } })
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 mt-16">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left Column - Cover Image */}
         <div className="md:col-span-1">
@@ -52,7 +56,7 @@ export default function MangaDetail({ params }: { params: { mangaId: string } })
             <CardContent className="p-4">
               <div className="relative aspect-[2/3] w-full">
                 <Image
-                  src={manga.coverImage}
+                  src={manga.cover_image_url}
                   alt={manga.title}
                   fill
                   className="object-cover rounded-lg"
@@ -72,7 +76,7 @@ export default function MangaDetail({ params }: { params: { mangaId: string } })
               <div className="flex items-center gap-2 mb-4">
                 <User className="w-4 h-4" />
                 <span className="text-sm text-gray-600">
-                  by {manga.author}
+                  by Hexapawa{/* by {manga.author} */}
                 </span>
               </div>
 
@@ -102,18 +106,18 @@ export default function MangaDetail({ params }: { params: { mangaId: string } })
                 <div className="space-y-2">
                   {manga.chapters.map((chapter) => (
                     <Link
-                      key={chapter.id}
-                      href={`/manga/${manga.id}/chapter/${chapter.number}`}
+                      key={chapter.chapter_id}
+                      href={`/manga/${manga.manga_id}/chapter/${chapter.chapter_id}`}
                       className="block"
                     >
                       <Card>
                         <CardContent className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
                           <div>
                             <div className="font-medium">
-                              Chapter {chapter.number}
+                              Chapter {chapter.chapter_number}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {new Date(chapter.uploadDate).toLocaleDateString()}
+                              {new Date(chapter.release_date).toLocaleDateString()}
                             </div>
                           </div>
                           <ChevronRight className="w-4 h-4 text-gray-400" />
