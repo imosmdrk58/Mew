@@ -10,43 +10,91 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 async function fetchMangaDetail(mangaId: string): Promise<Manga> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  return {
-    manga_id: parseInt(mangaId),
-    title: 'One Piece',
-    description: 'Follow Monkey D. Luffy and his pirate crew in their search for the ultimate treasure, the One Piece.',
-    cover_image_url: '/api/placeholder/350/500',
-    status: 'Ongoing',
-    published_date: '2025-01-10T11:14:40+03:00',
-    last_updated: '2025-01-10T11:14:40+03:00',
-    genres: ['Action', 'Adventure', 'Comedy', 'Fantasy'],
-    chapters: Array.from({ length: 20 }, (_, i) => ({
-      chapter_id: i + 1,
-      manga_id: parseInt(mangaId),
-      chapter_number: i + 1,
-      title: `Chapter ${i + 1}`,
-      release_date: '2025-01-10T11:14:40+03:00',
-      pages: [],
-      nextChapter: i < 19 ? i + 2 : undefined,
-      prevChapter: i > 0 ? i : undefined,
-      mangaId: parseInt(mangaId)
-    }))
-  };
+  try {
+    // API'den veriyi çek
+    const response = await fetch(`http://localhost:8080/manga/${mangaId}`);
+    
+    // Eğer cevap başarılı değilse hata fırlat
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // JSON verisini al
+    const data = await response.json();
+    console.log('API Response:', data); // API yanıtını logla
+
+    // API'den gelen veriyi Manga tipine dönüştür
+    const manga: Manga = {
+      manga_id: data.ID,
+      title: data.Title,
+      description: data.Description,
+      cover_image_url: data.CoverImage,
+      status: data.Status,
+      published_date: new Date().toISOString(), // Örnek tarih, API'den gelmiyorsa
+      last_updated: new Date().toISOString(), // Örnek tarih, API'den gelmiyorsa
+      genres: [], // API'den gelmiyorsa boş bırak
+      chapters: Array.from({ length: 20 }, (_, i) => ({
+        chapter_id: i + 1,
+        manga_id: data.ID,
+        chapter_number: i + 1,
+        title: `Chapter ${i + 1}`,
+        release_date: new Date().toISOString(), // Örnek tarih
+        pages: [], // Boş sayfa listesi
+        nextChapter: i < 19 ? i + 2 : undefined,
+        prevChapter: i > 0 ? i : undefined,
+        mangaId: data.ID,
+      })),
+    };
+
+    return manga;
+  } catch (error) {
+    console.error('Error fetching manga details:', error);
+    throw error; // Hata durumunda hatayı fırlat
+  }
 }
 
 export default function MangaDetail({ params }: { params: { mangaId: string } }) {
 
   // Mock data (remove when backend is ready)
+  const [manga, setManga] = useState<Manga | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [resolvedParams, setResolvedParams] = useState<{ mangaId: string; } | null>(null);
+
+    useEffect(() => {
+        const resolveParams = async () => {
+          const unwrappedParams = await params;
+          setResolvedParams(unwrappedParams);
+        };
+        resolveParams();
+      }, [params]);
+    
+      useEffect(() => {
+        if (!resolvedParams) return;
   
-  const manga = use(fetchMangaDetail(params.mangaId));
+        const fetchChapter = async () => {
+          try {
+            const mangaData = await fetchMangaDetail(resolvedParams.mangaId);
+            setManga(mangaData);
+          } catch (error) {
+            console.error('Failed to fetch chapter:', error);
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        fetchChapter();
+      }, [resolvedParams]);
+
+      if (!resolvedParams || isLoading) {
+        return <div>Loading...</div>;
+      }
   
 
   if (!manga) {
     return <div>Manga not found</div>;
   }
-
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   return (
     <div className="container mx-auto px-4 py-8 mt-16">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
