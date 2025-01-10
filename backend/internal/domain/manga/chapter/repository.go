@@ -19,7 +19,7 @@ func NewChapterRepository(db *sql.DB) ChapterRepository {
 }
 
 func (r *chapterRepository) GetAllChapters(mangaID int) ([]Chapter, error) {
-	rows, err := r.db.Query("SELECT chapter_id, title, chapter_number, release_date, manga_id FROM chapter WHERE manga_id = $1", mangaID)
+	rows, err := r.db.Query("SELECT chapter_id, title, chapter_number, release_date, manga_id FROM chapters WHERE manga_id = $1", mangaID)
 	if err != nil {
 		return nil, err
 	}

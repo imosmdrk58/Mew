@@ -18,9 +18,9 @@ async function getChapter(mangaId: string, chapterId: string): Promise<Chapter |
       chapter_number: 1,
       release_date: new Date().toISOString(),
       pages: [
-        { page_id: 1, chapter_id:parseInt(chapterId),url: "https://placehold.co/800x1200", page_number: 1 },
+        { page_id: 1, chapter_id:parseInt(chapterId),url: "https://placehold.co/900x1200", page_number: 1 },
         { page_id: 2,chapter_id:parseInt(chapterId), url: "https://placehold.co/800x1200", page_number: 2 },
-        { page_id: 3, chapter_id:parseInt(chapterId),url: "https://placehold.co/800x1200", page_number: 3 },
+        { page_id: 3, chapter_id:parseInt(chapterId),url: "https://placehold.co/1300x1200", page_number: 3 },
       ],
       nextChapter: 2,
       prevChapter: undefined

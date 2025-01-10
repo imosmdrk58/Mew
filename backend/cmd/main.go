@@ -47,6 +47,8 @@ func main() {
 
 	initializers.InitializeMangaComponents(database, router)
 	initializers.InitializeUserComponents(database, router)
+	initializers.InitializeAuthorComponents(database, router)
+	initializers.InitializeChapterComponents(database, router)
 
 	// Start server
 	log.Println("Starting server on port 8080...")

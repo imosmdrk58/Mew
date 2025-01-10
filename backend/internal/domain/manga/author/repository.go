@@ -86,13 +86,13 @@ func (r *authorRepository) CreateAuthor(author *Author) error {
 
 func (r *authorRepository) GetAuthorByMangaID(mangaID int) (*Author, error) {
 	row := r.db.QueryRow(`
-        SELECT a.author_id, a.name, a.bio, a.created_at, a.updated_at
+        SELECT a.author_id, a.name, a.bio
         FROM authors a
         JOIN manga_authors ma ON a.author_id = ma.author_id
         WHERE ma.manga_id = $1`, mangaID)
 
 	var author Author
-	if err := row.Scan(&author.AuthorID, &author.Name, &author.Bio, &author.CreatedAt, &author.UpdatedAt); err != nil {
+	if err := row.Scan(&author.AuthorID, &author.Name, &author.Bio); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}

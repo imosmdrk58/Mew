@@ -8,6 +8,7 @@ interface Manga {
   last_updated: string;
   genres: string[];
   chapters: Chapter[];
+  author: Author;
 }
 
 interface Author {
