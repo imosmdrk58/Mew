@@ -105,3 +105,84 @@ CREATE TABLE comments (
     content TEXT NOT NULL,
     posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Get_manga_details fonksiyonunu oluştur
+CREATE OR REPLACE FUNCTION get_manga_details(p_manga_id INT)
+RETURNS TABLE (
+    manga_id INTEGER,
+    title VARCHAR(255),
+    description TEXT,
+    status manga_status,
+    cover_image_url VARCHAR(255),
+    author_id INTEGER,
+    author_name VARCHAR(255),
+    author_bio TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        m.manga_id, 
+        m.title, 
+        m.description, 
+        m.status, 
+        m.cover_image_url, 
+        a.author_id, 
+        a.name AS author_name, 
+        a.bio AS author_bio
+    FROM 
+        manga m
+    JOIN 
+        manga_authors ma ON m.manga_id = ma.manga_id
+    JOIN 
+        authors a ON ma.author_id = a.author_id
+    WHERE 
+        m.manga_id = p_manga_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Get_chapter_with_pages fonksiyonunu oluştur
+CREATE OR REPLACE FUNCTION get_chapter_with_pagesid(
+    p_manga_id INTEGER,
+    p_chapter_number INTEGER
+)
+RETURNS TABLE (
+    chapter_id INTEGER,
+    manga_id INTEGER,
+    chapter_number INTEGER,
+    title VARCHAR(255),
+    release_date DATE,
+    page_id INTEGER,
+    page_number INTEGER,
+    image_url VARCHAR(255)
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT c.chapter_id, c.manga_id, c.chapter_number, c.title, c.release_date, p.page_id, p.page_number, p.image_url
+    FROM chapters c
+    LEFT JOIN pages p ON c.chapter_id = p.chapter_id
+    WHERE c.manga_id = p_manga_id AND c.chapter_number = p_chapter_number;
+END;
+$$ LANGUAGE plpgsql;
+
+-- add manga with author fonksiyonunu oluştur
+CREATE OR REPLACE FUNCTION add_manga_with_author(
+    p_title VARCHAR(255),
+    p_description TEXT,
+    p_status manga_status,
+    p_cover_image_url VARCHAR(255),
+    p_author_id INTEGER
+)
+RETURNS VOID AS $$
+DECLARE
+    v_manga_id INTEGER;
+BEGIN
+    -- manga tablosuna yeni bir kayıt ekle ve manga_id'yi al
+    INSERT INTO manga (title, description, status, cover_image_url)
+    VALUES (p_title, p_description, p_status, p_cover_image_url)
+    RETURNING manga_id INTO v_manga_id;
+
+    -- manga_authors tablosuna manga_id ve author_id'yi ekle
+    INSERT INTO manga_authors (manga_id, author_id)
+    VALUES (v_manga_id, p_author_id);
+END;
+$$ LANGUAGE plpgsql;

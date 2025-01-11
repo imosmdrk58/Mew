@@ -39,10 +39,10 @@ func (r *mangaRepository) GetAllManga() ([]Manga, error) {
 }
 
 func (r *mangaRepository) GetMangaByID(id int) (*Manga, error) {
-	row := r.db.QueryRow("SELECT manga_id, title, description, status, cover_image_url FROM manga WHERE manga_id = $1", id)
+	row := r.db.QueryRow("SELECT * FROM get_manga_details($1);", id)
 
 	var manga Manga
-	if err := row.Scan(&manga.ID, &manga.Title, &manga.Description, &manga.Status, &manga.CoverImage); err != nil {
+	if err := row.Scan(&manga.ID, &manga.Title, &manga.Description, &manga.Status, &manga.CoverImage, &manga.AuthorId, &manga.AuthorName, &manga.AuthorBio); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
@@ -53,7 +53,7 @@ func (r *mangaRepository) GetMangaByID(id int) (*Manga, error) {
 }
 
 func (r *mangaRepository) CreateManga(manga *Manga) error {
-	_, err := r.db.Exec("INSERT INTO manga (title, description, status, cover_image_url) VALUES ($1, $2, $3, $4)",
-		manga.Title, manga.Description, manga.Status, manga.CoverImage)
+	_, err := r.db.Exec("SELECT add_manga_with_author($1,$2,$3,$4,$5)",
+		manga.Title, manga.Description, manga.Status, manga.CoverImage, manga.AuthorId)
 	return err
 }

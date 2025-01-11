@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/melihaltin/manga-backend/config"
 	"github.com/melihaltin/manga-backend/initializers"
+	"github.com/rs/cors"
 
 	"github.com/melihaltin/manga-backend/internal/db"
 )
@@ -43,14 +44,22 @@ func main() {
 	// Initialize router
 	router := mux.NewRouter()
 
-	router.Use(corsMiddleware)
-
 	initializers.InitializeMangaComponents(database, router)
 	initializers.InitializeUserComponents(database, router)
 	initializers.InitializeAuthorComponents(database, router)
 	initializers.InitializeChapterComponents(database, router)
+	initializers.InitializePageComponents(database, router)
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Tüm origin'lere izin ver
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(router)
 
 	// Start server
 	log.Println("Starting server on port 8080...")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }

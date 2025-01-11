@@ -11,13 +11,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import {LoadingSpinner} from '@/components/ui/LoadingSpinner';
+import ErrorPage from '@/components/ui/ErrorPage';
 
 async function fetchMangaDetail(mangaId: string): Promise<Manga> {
   try {
     // API'den veriyi çek
     const response = await fetch(`http://localhost:8080/manga/${mangaId}`);
     const responseChapters = await fetch(`http://localhost:8080/manga/${mangaId}/chapters`);
-    const responseAuthors = await fetch(`http://localhost:8080/authors/manga/${mangaId}`);
     
     // Eğer cevap başarılı değilse hata fırlat
     if (!response.ok) {
@@ -28,19 +28,14 @@ async function fetchMangaDetail(mangaId: string): Promise<Manga> {
     {
       throw new Error(`HTTPChapterda error! status: ${responseChapters.status}`);
     }
-    if (!responseAuthors.ok)
-      {
-        throw new Error(`HTTPAuthorsda error! status: ${responseAuthors.status}`);
-      }
 
     // JSON verisini al
     const data = await response.json();
     const dataChapters = await responseChapters.json();
-    const dataAuthors = await responseAuthors.json();
 
     console.log('API Response:', data); // API yanıtını logla
     console.log('Chapter API Response:', dataChapters); // API yanıtını logla
-    console.log('Author API Response:', dataAuthors); // API yanıtını logla
+
 
     // API'den gelen veriyi Manga tipine dönüştür
     const manga: Manga = {
@@ -65,9 +60,9 @@ async function fetchMangaDetail(mangaId: string): Promise<Manga> {
         mangaId: data.id,
       })),
       author: {
-        author_id: dataAuthors.id,
-        name: dataAuthors.name,
-        bio: dataAuthors.bio
+        author_id: data.author_id,
+        name: data.author_name,
+        bio: data.author_bio
       },
     };
 
@@ -112,20 +107,9 @@ export default function MangaDetail({ params }: { params: { mangaId: string } })
       if (!resolvedParams || isLoading) {
         return <LoadingSpinner />;
       }
-  
 
   if (!manga) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-        <div className="flex items-center space-x-2 text-red-600">
-          <AlertCircle className="w-6 h-6" />
-          <span className="text-xl font-semibold">Manga not found</span>
-        </div>
-        <Button className="mt-4" onClick={() => window.location.href = '/'}>
-          Go to Home
-        </Button>
-      </div>
-    );
+    return <ErrorPage errorMessage="Manga not found" />;
   }
   
   if (isLoading) {
@@ -192,7 +176,7 @@ export default function MangaDetail({ params }: { params: { mangaId: string } })
                   {manga.chapters.map((chapter) => (
                     <Link
                       key={chapter.chapter_id}
-                      href={`/manga/${manga.manga_id}/chapter/${chapter.chapter_id}`}
+                      href={`/manga/${manga.manga_id}/chapter/${chapter.chapter_number}`}
                       className="block"
                     >
                       <Card>

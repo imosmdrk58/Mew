@@ -34,5 +34,14 @@ DROP TABLE IF EXISTS authors;
 -- Users tablosunu sil
 DROP TABLE IF EXISTS users;
 
+-- get manga details fonksiyonunu sil
+DROP FUNCTION IF EXISTS get_manga_details(INTEGER);
+
+-- get chapter details fonksiyonunu sil
+DROP FUNCTION IF EXISTS get_chapter_with_pagesid(INTEGER, INTEGER);
+
+-- add manga with author fonksiyonunu sil
+DROP FUNCTION IF EXISTS add_manga_with_author(VARCHAR(255), TEXT,manga_status,VARCHAR(255),INTEGER);
+
 -- Enum type manga_status'u sil
 DROP TYPE IF EXISTS manga_status;

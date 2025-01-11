@@ -8,38 +8,47 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import ErrorPage from '@/components/ui/ErrorPage';
 
 
-async function getChapter(mangaId: string, chapterId: string): Promise<Chapter | null> {
-    const mockChapter: Chapter = {
-      chapter_id: parseInt(chapterId),
-      manga_id: parseInt(mangaId),
-      title: "The Beginning",
-      chapter_number: 1,
-      release_date: new Date().toISOString(),
-      pages: [
-        { page_id: 1, chapter_id:parseInt(chapterId),url: "https://placehold.co/900x1200", page_number: 1 },
-        { page_id: 2,chapter_id:parseInt(chapterId), url: "https://placehold.co/800x1200", page_number: 2 },
-        { page_id: 3, chapter_id:parseInt(chapterId),url: "https://placehold.co/1300x1200", page_number: 3 },
-      ],
-      nextChapter: 2,
-      prevChapter: undefined
-    };
-    
-    return mockChapter;
-  }
+
+  const getNewChapter = async (mangaId: string, chapterNumber: string): Promise<Chapter | null> => {
+    const response = await fetch(`http://localhost:8080/manga/${mangaId}/chapters/${chapterNumber}`);
+    if (response.ok) {
+      const data = await response.json();
+
+      const chapter :Chapter  =
+      {
+        chapter_id: data.id,
+        manga_id: data.manga_id,
+        title: data.title,
+        chapter_number: data.chapter_number,
+        release_date: data.release_date,
+        pages: data.pages.map((page: any) => ({
+          page_id: page.id,
+          chapter_id: page.chapter_id,
+          url: page.image_url,
+          page_number: page.page_number
+        })),
+        nextChapter: parseInt(chapterNumber) + 1,
+        prevChapter: parseInt(chapterNumber) - 1
+      };
+
+      return chapter;
+      
+    }
+    return null;
+  };
 
 
-export default function ChapterPage({
-  params
-}: {
-  params: Promise<{ mangaId: string; chapterId: string }>
-}) {
+  const ChapterPage =  ({ params }: { params: { mangaId: string; chapterId: string } }) =>{
     const [currentPage, setCurrentPage] = useState(1);
     const [chapter, setChapter] = useState<Chapter | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [resolvedParams, setResolvedParams] = useState<{ mangaId: string; chapterId: string } | null>(null);
 
+    
     useEffect(() => {
         const resolveParams = async () => {
           const unwrappedParams = await params;
@@ -53,7 +62,8 @@ export default function ChapterPage({
   
         const fetchChapter = async () => {
           try {
-            const chapterData = await getChapter(resolvedParams.mangaId, resolvedParams.chapterId);
+            console.log("paramasv Ş " ,resolvedParams);
+            const chapterData = await getNewChapter(resolvedParams.mangaId, resolvedParams.chapterId);
             setChapter(chapterData);
           } catch (error) {
             console.error('Failed to fetch chapter:', error);
@@ -64,7 +74,6 @@ export default function ChapterPage({
       
         fetchChapter();
       }, [resolvedParams]);
-      
       useEffect(() => {
         if (!resolvedParams || !chapter) return;
   
@@ -82,16 +91,16 @@ export default function ChapterPage({
       }, [chapter, resolvedParams]);
   
       if (!resolvedParams || isLoading) {
-        return <div>Loading...</div>;
+        return <LoadingSpinner />;
       }
   
     if (!chapter) {
-      return <div>Loading...</div>;
+      return <ErrorPage errorMessage="Chapter not found" />
     }
 
     
 if (isLoading) {
-    return <div>Loading...</div>;
+  return <LoadingSpinner />;
   }
 
   return (
@@ -132,7 +141,6 @@ if (isLoading) {
                 src={page.url}
                 alt={`Page ${page.page_number}`}
                 className="w-full h-auto"
-                loading="lazy"
               />
             </div>
           ))}
@@ -163,3 +171,6 @@ if (isLoading) {
     </main>
   );
 }
+
+
+export default ChapterPage;

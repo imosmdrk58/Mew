@@ -25,7 +25,8 @@ func NewChapterHandler(service ChapterService) ChapterHandler {
 
 func (h *chapterHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/manga/{id}/chapters", h.GetAllChapters).Methods("GET")
-	router.HandleFunc("/manga/{id}/chapters/{id}", h.GetChapterByID).Methods("GET")
+	router.HandleFunc("/manga/chapters/{id}", h.GetChapterByID).Methods("GET")
+	router.HandleFunc("/manga/{manga_id}/chapters/{chapter_number}", h.GetChapterByMangaIDandChapterNumber).Methods("GET")
 	router.HandleFunc("/manga/{id}/chapters/create-chapter", h.CreateChapter).Methods("POST")
 }
 
@@ -56,6 +57,36 @@ func (h *chapterHandler) GetChapterByID(w http.ResponseWriter, r *http.Request) 
 	}
 
 	chapter, err := h.service.GetChapterByID(id)
+	if err != nil {
+		http.Error(w, "Failed to fetch chapter details", http.StatusInternalServerError)
+		return
+	}
+
+	if chapter == nil {
+		http.Error(w, "Chapter not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chapter)
+}
+
+func (h *chapterHandler) GetChapterByMangaIDandChapterNumber(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	mangaId, err := strconv.Atoi(vars["manga_id"])
+	if err != nil {
+		http.Error(w, "Invalid Manga Id", http.StatusBadRequest)
+		return
+	}
+
+	chapterNumber, err := strconv.Atoi(vars["chapter_number"])
+	if err != nil {
+		http.Error(w, "Invalid Chapter Number", http.StatusBadRequest)
+		return
+	}
+
+	chapter, err := h.service.GetChapterByMangaIDandChapterNumber(mangaId, chapterNumber)
 	if err != nil {
 		http.Error(w, "Failed to fetch chapter details", http.StatusInternalServerError)
 		return

@@ -2,11 +2,13 @@ package chapter
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type ChapterRepository interface {
 	GetAllChapters(mangaID int) ([]Chapter, error)
 	GetChapterByID(id int) (*Chapter, error)
+	GetChapterByMangaIDandChapterNumber(mangaId int, chapterNumber int) (*Chapter, error)
 	CreateChapter(chapter *Chapter) error
 }
 
@@ -39,7 +41,7 @@ func (r *chapterRepository) GetAllChapters(mangaID int) ([]Chapter, error) {
 
 func (r *chapterRepository) GetChapterByID(id int) (*Chapter, error) {
 
-	row := r.db.QueryRow("SELECT chapter_id, title, chapter_number, release_date, manga_id FROM chapter WHERE chapter_id = $1", id)
+	row := r.db.QueryRow("SELECT chapter_id, title, chapter_number, release_date, manga_id FROM chapters WHERE chapter_id = $1", id)
 
 	var chapter Chapter
 	if err := row.Scan(&chapter.ID, &chapter.Title, &chapter.ChapterNumber, &chapter.ReleaseDate, &chapter.MangaID); err != nil {
@@ -50,6 +52,42 @@ func (r *chapterRepository) GetChapterByID(id int) (*Chapter, error) {
 	}
 
 	return &chapter, nil
+}
+
+func (r *chapterRepository) GetChapterByMangaIDandChapterNumber(mangaId int, chapterNumber int) (*Chapter, error) {
+	rows, err := r.db.Query("SELECT * FROM get_chapter_with_pagesid($1, $2)", mangaId, chapterNumber)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var chapter *Chapter
+	var pages []Page
+	for rows.Next() {
+		var currentChapter Chapter
+		var page Page
+		if err := rows.Scan(&currentChapter.ID, &currentChapter.MangaID, &currentChapter.ChapterNumber, &currentChapter.Title, &currentChapter.ReleaseDate, &page.ID, &page.PageNumber, &page.ImageURL); err != nil {
+			return nil, err
+		}
+		// First iteration or check for consistency
+		if chapter == nil {
+			chapter = &currentChapter
+		} else {
+			// Ensure chapter details are consistent across rows
+			if chapter.ID != currentChapter.ID || chapter.MangaID != currentChapter.MangaID ||
+				chapter.Title != currentChapter.Title || chapter.ChapterNumber != currentChapter.ChapterNumber {
+				return nil, fmt.Errorf("inconsistent chapter details in query results")
+			}
+		}
+
+		pages = append(pages, page)
+	}
+	if chapter == nil {
+		return nil, fmt.Errorf("no chapter found for manga ID %d and chapter number %d", mangaId, chapterNumber)
+	}
+
+	chapter.Pages = pages
+	return chapter, nil
 }
 
 func (r *chapterRepository) CreateChapter(chapter *Chapter) error {
