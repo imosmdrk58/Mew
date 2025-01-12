@@ -124,7 +124,7 @@ const AddChapterPage= () => {
         description: 'Chapter has been created successfully',
       })
 
-       router.push(`/manga/${params.mangaId}`)
+       router.push(`/admin/add`)
     } catch (error) {
       toast({
         title: 'Error',

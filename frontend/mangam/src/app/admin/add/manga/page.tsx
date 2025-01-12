@@ -21,6 +21,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useRouter } from "next/navigation";
 
 // Form schema with validation
 const formSchema = z.object({
@@ -28,12 +29,12 @@ const formSchema = z.object({
   authorId: z.string().min(1, "Yazar zorunludur"),
   description: z.string().min(1, "Açıklama zorunludur"),
   status: z.string().min(1, "Durum zorunludur"),
-  coverImage: z.string().optional(), // coverImage'i opsiyonel yaptık
+  coverImage: z.string().optional(),
+  publishedDate: z.string().min(1, "Yayın tarihi zorunludur"), // Yeni eklenen alan
 });
 
-
-
 const AddMangaPage = () => {
+  const router = useRouter();
   const [authors, setAuthors] = useState<Author[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -46,6 +47,7 @@ const AddMangaPage = () => {
       description: "",
       status: "",
       coverImage: "",
+      publishedDate: "", // Yeni eklenen alan
     },
   });
 
@@ -53,13 +55,22 @@ const AddMangaPage = () => {
     const fetchAuthors = async () => {
       try {
         const response = await fetch('http://localhost:8080/authors');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-        const newAuthors: Author[] = data.map((author: any) => ({
-          author_id: author.author_id,
-          name: author.name,
-          bio: author.bio,
-        }));
-        setAuthors(newAuthors);
+        if (data) {
+          const newAuthors: Author[] = data.map((author: any) => ({
+            author_id: author.author_id,
+            name: author.name,
+            bio: author.bio,
+          }));
+          setAuthors(newAuthors);
+        }
+        else
+        {
+          setAuthors([]);
+        }
       } catch (error) {
         console.error('Error fetching authors:', error);
       } finally {
@@ -72,23 +83,23 @@ const AddMangaPage = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setSubmitError(null);
-      
-      // authorId'yi sayıya dönüştür
+
       const formData = {
         ...values,
         authorId: parseInt(values.authorId, 10),
       };
-  
+
       const data = {
-        "title": formData.title,
-        "description": formData.description,
-        "status": formData.status,
-        "cover_image": formData.coverImage,
-        "author_id": formData.authorId,
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        cover_image: formData.coverImage,
+        author_id: formData.authorId,
+        published_date: formData.publishedDate, // Yeni eklenen alan
       };
-      
+
       console.log('Form submitted with values:', JSON.stringify(data));
-    
+
       const response = await fetch('http://localhost:8080/manga/create-manga', {
         method: 'POST',
         headers: {
@@ -96,21 +107,21 @@ const AddMangaPage = () => {
         },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) {
-        const errorResponse = await response.json(); // API'den gelen hata mesajını oku
+        const errorResponse = await response.json();
         throw new Error(`API call failed: ${errorResponse.message || 'Unknown error'}`);
       }
-  
+
       const result = await response.json();
       console.log('API response:', result);
-  
-      const mangaId = result.id;
+
+      router.push(`/admin/add`);
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitError('Form gönderilirken bir hata oluştu.');
     }
-}
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 p-6">
@@ -202,6 +213,25 @@ const AddMangaPage = () => {
               />
               <FormField
                 control={form.control}
+                name="publishedDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-gray-700">
+                      Yayın Tarihi
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="date"
+                        className="h-11 rounded-lg border-gray-200 focus:border-violet-500 focus:ring-violet-500 transition-all duration-200"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-500" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
@@ -261,6 +291,7 @@ const AddMangaPage = () => {
                   </FormItem>
                 )}
               />
+              
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-600 hover:to-indigo-600 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"

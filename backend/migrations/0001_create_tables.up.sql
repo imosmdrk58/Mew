@@ -113,6 +113,7 @@ RETURNS TABLE (
     title VARCHAR(255),
     description TEXT,
     status manga_status,
+    published_date DATE,
     cover_image_url VARCHAR(255),
     author_id INTEGER,
     author_name VARCHAR(255),
@@ -125,6 +126,7 @@ BEGIN
         m.title, 
         m.description, 
         m.status, 
+		m.published_date,
         m.cover_image_url, 
         a.author_id, 
         a.name AS author_name, 
@@ -170,15 +172,16 @@ CREATE OR REPLACE FUNCTION add_manga_with_author(
     p_description TEXT,
     p_status manga_status,
     p_cover_image_url VARCHAR(255),
-    p_author_id INTEGER
+    p_author_id INTEGER,
+    p_published_date DATE
 )
 RETURNS VOID AS $$
 DECLARE
     v_manga_id INTEGER;
 BEGIN
     -- manga tablosuna yeni bir kayıt ekle ve manga_id'yi al
-    INSERT INTO manga (title, description, status, cover_image_url)
-    VALUES (p_title, p_description, p_status, p_cover_image_url)
+    INSERT INTO manga (title, description, status, cover_image_url, published_date)
+    VALUES (p_title, p_description, p_status, p_cover_image_url, p_published_date)
     RETURNING manga_id INTO v_manga_id;
 
     -- manga_authors tablosuna manga_id ve author_id'yi ekle
@@ -204,3 +207,25 @@ BEGIN
     VALUES (p_chapter_id, p_page_number, p_image_url);
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- view
+
+-- vw_manga_details view oluştur
+CREATE OR REPLACE VIEW vw_manga_details AS
+SELECT 
+    m.manga_id, 
+    m.title, 
+    m.description, 
+    m.status, 
+    m.cover_image_url, 
+    m.published_date,  -- published_date sütunu eklendi
+    a.author_id, 
+    a.name AS author_name, 
+    a.bio AS author_bio
+FROM 
+    manga m
+JOIN 
+    manga_authors ma ON m.manga_id = ma.manga_id
+JOIN 
+    authors a ON ma.author_id = a.author_id;

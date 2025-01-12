@@ -58,7 +58,8 @@ export default function AddAuthorPage() {
         title: "Başarılı!",
         description: "Yazar başarıyla eklendi.",
       })
-     
+      
+      router.push(`/admin/add`);
     } catch (error) {
       toast({
         variant: "destructive",
