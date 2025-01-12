@@ -2,6 +2,7 @@ package page
 
 type PageService interface {
 	GetPagesByChapterID(chapterID int) ([]Page, error)
+	CreatePage(page *Page) error
 }
 
 type pageService struct {
@@ -14,4 +15,8 @@ func NewPageService(repo PageRepository) PageService {
 
 func (s *pageService) GetPagesByChapterID(chapterID int) ([]Page, error) {
 	return s.repo.GetPagesByChapterID(chapterID)
+}
+
+func (s *pageService) CreatePage(page *Page) error {
+	return s.repo.CreatePage(page)
 }

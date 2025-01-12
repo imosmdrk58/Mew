@@ -32,7 +32,8 @@ const formSchema = z.object({
 });
 
 
-export default function AddMangaPage() {
+
+const AddMangaPage = () => {
   const [authors, setAuthors] = useState<Author[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -104,6 +105,7 @@ export default function AddMangaPage() {
       const result = await response.json();
       console.log('API response:', result);
   
+      const mangaId = result.id;
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitError('Form gönderilirken bir hata oluştu.');
@@ -272,3 +274,5 @@ export default function AddMangaPage() {
     </div>
   );
 }
+
+export default AddMangaPage;

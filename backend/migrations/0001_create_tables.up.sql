@@ -186,3 +186,21 @@ BEGIN
     VALUES (v_manga_id, p_author_id);
 END;
 $$ LANGUAGE plpgsql;
+
+-- insert_page fonksiyonunu oluştur
+CREATE OR REPLACE FUNCTION insert_page(
+    p_chapter_id INTEGER,
+    p_page_number INTEGER,
+    p_image_url VARCHAR(255)
+) RETURNS VOID AS $$
+BEGIN
+    -- Aynı chapter_id ve page_number kombinasyonunun zaten var olup olmadığını kontrol et
+    IF EXISTS (SELECT 1 FROM pages WHERE chapter_id = p_chapter_id AND page_number = p_page_number) THEN
+        RAISE EXCEPTION 'Bu chapter_id ve page_number kombinasyonu zaten mevcut.';
+    END IF;
+
+    -- Yeni sayfayı ekle
+    INSERT INTO pages (chapter_id, page_number, image_url)
+    VALUES (p_chapter_id, p_page_number, p_image_url);
+END;
+$$ LANGUAGE plpgsql;

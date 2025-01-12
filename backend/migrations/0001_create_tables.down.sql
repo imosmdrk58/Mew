@@ -43,5 +43,8 @@ DROP FUNCTION IF EXISTS get_chapter_with_pagesid(INTEGER, INTEGER);
 -- add manga with author fonksiyonunu sil
 DROP FUNCTION IF EXISTS add_manga_with_author(VARCHAR(255), TEXT,manga_status,VARCHAR(255),INTEGER);
 
+-- insert_page fonksiyonunu sil
+DROP FUNCTION IF EXISTS insert_page(INTEGER, INTEGER,VARCHAR(255));
+
 -- Enum type manga_status'u sil
 DROP TYPE IF EXISTS manga_status;

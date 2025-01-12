@@ -108,8 +108,12 @@ func (h *chapterHandler) CreateChapter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.service.CreateChapter(&chapter); err != nil {
+	chapterId, err := h.service.CreateChapter(&chapter)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	chapter.ID = chapterId
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(chapter)
 }

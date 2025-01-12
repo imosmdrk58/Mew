@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button';
 import {LoadingSpinner} from '@/components/ui/LoadingSpinner';
 import ErrorPage from '@/components/ui/ErrorPage';
 
-async function fetchMangaDetail(mangaId: string): Promise<Manga> {
+
+const fetchMangaDetail = async (mangaId: string): Promise<Manga> => {
   try {
     // API'den veriyi çek
     const response = await fetch(`http://localhost:8080/manga/${mangaId}`);
@@ -73,7 +74,8 @@ async function fetchMangaDetail(mangaId: string): Promise<Manga> {
   }
 }
 
-export default function MangaDetail({ params }: { params: { mangaId: string } }) {
+
+const MangaDetailPage = ({ params }: { params: { mangaId: string } }) => {
 
   // Mock data (remove when backend is ready)
   const [manga, setManga] = useState<Manga | null>(null);
@@ -240,3 +242,5 @@ function LoadingSkeleton() {
     </div>
   );
 }
+
+export default MangaDetailPage;

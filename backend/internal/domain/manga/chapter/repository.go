@@ -9,7 +9,7 @@ type ChapterRepository interface {
 	GetAllChapters(mangaID int) ([]Chapter, error)
 	GetChapterByID(id int) (*Chapter, error)
 	GetChapterByMangaIDandChapterNumber(mangaId int, chapterNumber int) (*Chapter, error)
-	CreateChapter(chapter *Chapter) error
+	CreateChapter(chapter *Chapter) (int, error)
 }
 
 type chapterRepository struct {
@@ -90,8 +90,16 @@ func (r *chapterRepository) GetChapterByMangaIDandChapterNumber(mangaId int, cha
 	return chapter, nil
 }
 
-func (r *chapterRepository) CreateChapter(chapter *Chapter) error {
-	_, err := r.db.Exec("INSERT INTO chapter (title, chapter_number, release_date, manga_id) VALUES ($1, $2, $3, $4)",
-		chapter.Title, chapter.ChapterNumber, chapter.ReleaseDate, chapter.MangaID)
-	return err
+func (r *chapterRepository) CreateChapter(chapter *Chapter) (int, error) {
+	var chapterID int
+	err := r.db.QueryRow(
+		"INSERT INTO chapters (title, chapter_number, release_date, manga_id) VALUES ($1, $2, $3, $4) RETURNING chapter_id",
+		chapter.Title, chapter.ChapterNumber, chapter.ReleaseDate, chapter.MangaID,
+	).Scan(&chapterID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return chapterID, nil
 }

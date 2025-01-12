@@ -4,7 +4,7 @@ type ChapterService interface {
 	GetAllChapters(id int) ([]Chapter, error)
 	GetChapterByID(id int) (*Chapter, error)
 	GetChapterByMangaIDandChapterNumber(mangaId int, chapterNumber int) (*Chapter, error)
-	CreateChapter(chapter *Chapter) error
+	CreateChapter(chapter *Chapter) (int, error)
 }
 
 type chapterService struct {
@@ -27,6 +27,6 @@ func (s *chapterService) GetChapterByMangaIDandChapterNumber(mangaId int, chapte
 	return s.repo.GetChapterByMangaIDandChapterNumber(mangaId, chapterNumber)
 }
 
-func (s *chapterService) CreateChapter(chapter *Chapter) error {
+func (s *chapterService) CreateChapter(chapter *Chapter) (int, error) {
 	return s.repo.CreateChapter(chapter)
 }
