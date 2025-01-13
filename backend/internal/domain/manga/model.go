@@ -5,7 +5,7 @@ import (
 )
 
 type Manga struct {
-	ID            int       `json:"id"`
+	ID            int       `json:"manga_id" db:"manga_id"`
 	Title         string    `json:"title"`
 	Description   string    `json:"description"`
 	Status        string    `json:"status"`
@@ -15,4 +15,6 @@ type Manga struct {
 	AuthorId      int       `json:"author_id"`
 	AuthorName    string    `json:"author_name"`
 	AuthorBio     string    `json:"author_bio"`
+	Genre         string    `json:"genre"`  // Yeni eklenen alan
+	Rating        float64   `json:"rating"` // Yeni eklenen alan
 }

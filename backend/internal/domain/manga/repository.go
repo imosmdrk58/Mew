@@ -3,6 +3,7 @@ package manga
 import (
 	"database/sql"
 	"errors"
+	"log"
 )
 
 type MangaRepository interface {
@@ -20,8 +21,9 @@ func NewMangaRepository(db *sql.DB) MangaRepository {
 }
 
 func (r *mangaRepository) GetAllManga() ([]Manga, error) {
-	rows, err := r.db.Query("SELECT * FROM vw_manga_details;")
+	rows, err := r.db.Query("SELECT manga_id, title, cover_image, description FROM vw_manga_details")
 	if err != nil {
+		log.Printf("Database query error: %v", err) // Hata detayını logla
 		return nil, err
 	}
 	defer rows.Close()
@@ -29,10 +31,26 @@ func (r *mangaRepository) GetAllManga() ([]Manga, error) {
 	var mangaList []Manga
 	for rows.Next() {
 		var manga Manga
-		if err := rows.Scan(&manga.ID, &manga.Title, &manga.Description, &manga.Status, &manga.CoverImage, &manga.PublishedDate, &manga.AuthorId, &manga.AuthorName, &manga.AuthorBio); err != nil {
+		if err := rows.Scan(
+			&manga.ID,
+			&manga.Title,
+			&manga.CoverImage,
+			&manga.Description,
+		); err != nil {
+			log.Printf("Row scan error: %v", err) // Tarama hatalarını logla
 			return nil, err
 		}
 		mangaList = append(mangaList, manga)
+	}
+
+	// log manga
+	for _, manga := range mangaList {
+		log.Printf("Manga: %v", manga)
+	}
+
+	// Eğer hiç sonuç yoksa bu durumu loglayabilirsiniz
+	if len(mangaList) == 0 {
+		log.Println("No manga found in the database.")
 	}
 
 	return mangaList, nil

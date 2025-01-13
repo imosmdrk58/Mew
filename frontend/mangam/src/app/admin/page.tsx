@@ -30,7 +30,7 @@ const MangaListPage = () => {
         manga_id: manga.id,
         title: manga.title,
         description: manga.description,
-        cover_image_url: manga.cover_image,
+        cover_image: manga.cover_image,
         status: manga.status,
         author: {
           author_id: manga.author_id,

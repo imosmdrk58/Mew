@@ -13,40 +13,40 @@ DROP FUNCTION IF EXISTS add_manga_with_author(VARCHAR(255), TEXT,manga_status,VA
 DROP FUNCTION IF EXISTS insert_page(INTEGER, INTEGER,VARCHAR(255));
 
 -- Comments tablosunu sil
-DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS comments CASCADE;
 
 -- Ratings tablosunu sil
-DROP TABLE IF EXISTS ratings;
+DROP TABLE IF EXISTS ratings CASCADE;
 
 -- User_Favorites tablosunu sil
-DROP TABLE IF EXISTS user_favorites;
+DROP TABLE IF EXISTS user_favorites CASCADE;
 
 -- User_Reading_Progress tablosunu sil
-DROP TABLE IF EXISTS user_reading_progress;
+DROP TABLE IF EXISTS user_reading_progress CASCADE;
 
 -- Pages tablosunu sil
-DROP TABLE IF EXISTS pages;
+DROP TABLE IF EXISTS pages CASCADE;
 
 -- Chapters tablosunu sil
-DROP TABLE IF EXISTS chapters;
+DROP TABLE IF EXISTS chapters CASCADE;
 
 -- Manga_Genres ilişki tablosunu sil
-DROP TABLE IF EXISTS manga_genres;
+DROP TABLE IF EXISTS manga_genres CASCADE;
 
 -- Manga_Authors ilişki tablosunu sil
-DROP TABLE IF EXISTS manga_authors;
+DROP TABLE IF EXISTS manga_authors CASCADE;
 
 -- Manga tablosunu sil
-DROP TABLE IF EXISTS manga;
+DROP TABLE IF EXISTS manga CASCADE;
 
 -- Genres tablosunu sil
-DROP TABLE IF EXISTS genres;
+DROP TABLE IF EXISTS genres CASCADE;
 
 -- Authors tablosunu sil
-DROP TABLE IF EXISTS authors;
+DROP TABLE IF EXISTS authors CASCADE;
 
 -- Users tablosunu sil
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users CASCADE;
 
 -- Enum type manga_status'u sil
-DROP TYPE IF EXISTS manga_status;
+DROP TYPE IF EXISTS manga_status CASCADE;

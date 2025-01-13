@@ -29,7 +29,7 @@ CREATE TABLE manga (
     manga_id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT DEFAULT '',
-    cover_image_url VARCHAR(255) DEFAULT '',
+    cover_image VARCHAR(255) DEFAULT '',
     status manga_status NOT NULL,
     published_date DATE DEFAULT NULL,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -68,7 +68,7 @@ CREATE TABLE pages (
     UNIQUE (chapter_id, page_number)
 );
 
--- User_Reading_Progress tablosu
+
 CREATE TABLE user_reading_progress (
     user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     manga_id INTEGER NOT NULL REFERENCES manga(manga_id) ON DELETE CASCADE,
@@ -78,7 +78,7 @@ CREATE TABLE user_reading_progress (
     PRIMARY KEY (user_id, manga_id)
 );
 
--- User_Favorites tablosu
+
 CREATE TABLE user_favorites (
     user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     manga_id INTEGER NOT NULL REFERENCES manga(manga_id) ON DELETE CASCADE,
@@ -86,7 +86,7 @@ CREATE TABLE user_favorites (
     PRIMARY KEY (user_id, manga_id)
 );
 
--- Ratings tablosu
+
 CREATE TABLE ratings (
     rating_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
@@ -97,7 +97,18 @@ CREATE TABLE ratings (
     UNIQUE (user_id, manga_id)
 );
 
--- Comments tablosu
+
+CREATE TABLE IF NOT EXISTS manga_ratings (
+    rating_id SERIAL PRIMARY KEY,
+    manga_id INT NOT NULL,
+    user_id INT NOT NULL,
+    rating INT CHECK (rating >= 1 AND rating <= 5),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (manga_id) REFERENCES manga(manga_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+
 CREATE TABLE comments (
     comment_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
@@ -106,7 +117,7 @@ CREATE TABLE comments (
     posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Get_manga_details fonksiyonunu oluştur
+
 CREATE OR REPLACE FUNCTION get_manga_details(p_manga_id INT)
 RETURNS TABLE (
     manga_id INTEGER,
@@ -114,7 +125,7 @@ RETURNS TABLE (
     description TEXT,
     status manga_status,
     published_date DATE,
-    cover_image_url VARCHAR(255),
+    cover_image VARCHAR(255),
     author_id INTEGER,
     author_name VARCHAR(255),
     author_bio TEXT
@@ -127,7 +138,7 @@ BEGIN
         m.description, 
         m.status, 
 		m.published_date,
-        m.cover_image_url, 
+        m.cover_image, 
         a.author_id, 
         a.name AS author_name, 
         a.bio AS author_bio
@@ -142,7 +153,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Get_chapter_with_pages fonksiyonunu oluştur
 CREATE OR REPLACE FUNCTION get_chapter_with_pagesid(
     p_manga_id INTEGER,
     p_chapter_number INTEGER
@@ -166,12 +176,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- add manga with author fonksiyonunu oluştur
+
 CREATE OR REPLACE FUNCTION add_manga_with_author(
     p_title VARCHAR(255),
     p_description TEXT,
     p_status manga_status,
-    p_cover_image_url VARCHAR(255),
+    p_cover_image VARCHAR(255),
     p_author_id INTEGER,
     p_published_date DATE
 )
@@ -179,30 +189,27 @@ RETURNS VOID AS $$
 DECLARE
     v_manga_id INTEGER;
 BEGIN
-    -- manga tablosuna yeni bir kayıt ekle ve manga_id'yi al
-    INSERT INTO manga (title, description, status, cover_image_url, published_date)
-    VALUES (p_title, p_description, p_status, p_cover_image_url, p_published_date)
+  
+    INSERT INTO manga (title, description, status, cover_image, published_date)
+    VALUES (p_title, p_description, p_status, p_cover_image, p_published_date)
     RETURNING manga_id INTO v_manga_id;
 
-    -- manga_authors tablosuna manga_id ve author_id'yi ekle
     INSERT INTO manga_authors (manga_id, author_id)
     VALUES (v_manga_id, p_author_id);
 END;
 $$ LANGUAGE plpgsql;
 
--- insert_page fonksiyonunu oluştur
+
 CREATE OR REPLACE FUNCTION insert_page(
     p_chapter_id INTEGER,
     p_page_number INTEGER,
     p_image_url VARCHAR(255)
 ) RETURNS VOID AS $$
 BEGIN
-    -- Aynı chapter_id ve page_number kombinasyonunun zaten var olup olmadığını kontrol et
     IF EXISTS (SELECT 1 FROM pages WHERE chapter_id = p_chapter_id AND page_number = p_page_number) THEN
         RAISE EXCEPTION 'Bu chapter_id ve page_number kombinasyonu zaten mevcut.';
     END IF;
 
-    -- Yeni sayfayı ekle
     INSERT INTO pages (chapter_id, page_number, image_url)
     VALUES (p_chapter_id, p_page_number, p_image_url);
 END;
@@ -218,8 +225,8 @@ SELECT
     m.title, 
     m.description, 
     m.status, 
-    m.cover_image_url, 
-    m.published_date,  -- published_date sütunu eklendi
+    m.cover_image, 
+    m.published_date, 
     a.author_id, 
     a.name AS author_name, 
     a.bio AS author_bio

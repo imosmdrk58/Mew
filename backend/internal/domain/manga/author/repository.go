@@ -24,7 +24,7 @@ func NewAuthorRepository(db *sql.DB) AuthorRepository {
 
 func (r *authorRepository) GetMangaByAuthorID(authorID int) ([]manga.Manga, error) {
 	rows, err := r.db.Query(`
-        SELECT m.manga_id, m.title, m.description, m.cover_image_url, m.status, m.published_date, m.last_updated
+        SELECT m.manga_id, m.title, m.description, m.cover_image, m.status, m.published_date, m.last_updated
         FROM manga m
         JOIN manga_authors ma ON m.manga_id = ma.manga_id
         WHERE ma.author_id = $1`, authorID)

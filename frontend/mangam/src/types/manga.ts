@@ -1,14 +1,17 @@
 interface Manga {
   manga_id: number;
+  id?: number;
   title: string;
+  genre?: string;
   description: string;
-  cover_image_url: string;
+  cover_image: string;
   status: "ongoing" | "completed" | "hiatus";
   published_date: string;
   last_updated: string;
   genres: string[];
   chapters: Chapter[];
   author: Author;
+  rating?: number;
 }
 
 interface Author {

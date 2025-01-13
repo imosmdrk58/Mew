@@ -1,1 +1,0 @@
-ALTER TABLE manga DROP CONSTRAINT unique_title;

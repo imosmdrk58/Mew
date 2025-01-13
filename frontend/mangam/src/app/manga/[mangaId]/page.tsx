@@ -1,49 +1,50 @@
-'use client';
+"use client";
 
-import { useEffect, useState, use } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { AlertCircle } from 'lucide-react';
-import { ChevronRight, BookOpen, User } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import {LoadingSpinner} from '@/components/ui/LoadingSpinner';
-import ErrorPage from '@/components/ui/ErrorPage';
-
+import { useEffect, useState, use } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { AlertCircle } from "lucide-react";
+import { ChevronRight, BookOpen, User } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import ErrorPage from "@/components/ui/ErrorPage";
 
 const fetchMangaDetail = async (mangaId: string): Promise<Manga> => {
   try {
     // API'den veriyi çek
     const response = await fetch(`http://localhost:8080/manga/${mangaId}`);
-    const responseChapters = await fetch(`http://localhost:8080/manga/${mangaId}/chapters`);
-    
+    const responseChapters = await fetch(
+      `http://localhost:8080/manga/${mangaId}/chapters`
+    );
+
     // Eğer cevap başarılı değilse hata fırlat
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
-    if (!responseChapters.ok)
-    {
-      throw new Error(`HTTPChapterda error! status: ${responseChapters.status}`);
+
+    if (!responseChapters.ok) {
+      throw new Error(
+        `HTTPChapterda error! status: ${responseChapters.status}`
+      );
     }
 
     // JSON verisini al
     const data = await response.json();
     const dataChapters = await responseChapters.json();
 
-    console.log('API Response:', data); // API yanıtını logla
-    console.log('Chapter API Response:', dataChapters); // API yanıtını logla
-
+    console.log("API Response:", data); // API yanıtını logla
+    console.log("Chapter API Response:", dataChapters); // API yanıtını logla
 
     // API'den gelen veriyi Manga tipine dönüştür
     const manga: Manga = {
       manga_id: data.id,
       title: data.title,
       description: data.description,
-      cover_image_url: data.cover_image,
+      cover_image: data.cover_image,
       status: data.status,
       published_date: data.published_date,
       last_updated: data.last_updated,
@@ -56,64 +57,68 @@ const fetchMangaDetail = async (mangaId: string): Promise<Manga> => {
         release_date: chapter.release_date || new Date().toISOString(),
         genres: [],
         pages: chapter.pages || [],
-        nextChapter: index < dataChapters.length - 1 ? dataChapters[index + 1].chapter_number : undefined,
-        prevChapter: index > 0 ? dataChapters[index - 1].chapter_number : undefined,
+        nextChapter:
+          index < dataChapters.length - 1
+            ? dataChapters[index + 1].chapter_number
+            : undefined,
+        prevChapter:
+          index > 0 ? dataChapters[index - 1].chapter_number : undefined,
         mangaId: data.id,
       })),
       author: {
         author_id: data.author_id,
         name: data.author_name,
-        bio: data.author_bio
+        bio: data.author_bio,
       },
     };
 
     return manga;
   } catch (error) {
-    console.error('Error fetching manga details:', error);
+    console.error("Error fetching manga details:", error);
     throw error; // Hata durumunda hatayı fırlat
   }
-}
-
+};
 
 const MangaDetailPage = ({ params }: { params: { mangaId: string } }) => {
-
   // Mock data (remove when backend is ready)
   const [manga, setManga] = useState<Manga | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [resolvedParams, setResolvedParams] = useState<{ mangaId: string; } | null>(null);
+  const [resolvedParams, setResolvedParams] = useState<{
+    mangaId: string;
+  } | null>(null);
 
-    useEffect(() => {
-        const resolveParams = async () => {
-          const unwrappedParams = await params;
-          setResolvedParams(unwrappedParams);
-        };
-        resolveParams();
-      }, [params]);
-    
-      useEffect(() => {
-        if (!resolvedParams) return;
-  
-        const fetchChapter = async () => {
-          try {
-            const mangaData = await fetchMangaDetail(resolvedParams.mangaId);
-            setManga(mangaData);
-          } catch (error) {
-            console.error('Failed to fetch chapter:', error);
-          } finally {
-            setIsLoading(false);
-          }
-        };
-        fetchChapter();
-      }, [resolvedParams]);
+  useEffect(() => {
+    const resolveParams = async () => {
+      const unwrappedParams = await params;
+      setResolvedParams(unwrappedParams);
+    };
+    resolveParams();
+  }, [params]);
 
-      if (!resolvedParams || isLoading) {
-        return <LoadingSpinner />;
+  useEffect(() => {
+    if (!resolvedParams) return;
+
+    const fetchChapter = async () => {
+      try {
+        const mangaData = await fetchMangaDetail(resolvedParams.mangaId);
+        setManga(mangaData);
+      } catch (error) {
+        console.error("Failed to fetch chapter:", error);
+      } finally {
+        setIsLoading(false);
       }
+    };
+    fetchChapter();
+  }, [resolvedParams]);
+
+  if (!resolvedParams || isLoading) {
+    return <LoadingSpinner />;
+  }
 
   if (!manga) {
     return <ErrorPage errorMessage="Manga not found" />;
   }
-  
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -127,7 +132,7 @@ const MangaDetailPage = ({ params }: { params: { mangaId: string } }) => {
             <CardContent className="p-4">
               <div className="relative aspect-[2/3] w-full">
                 <Image
-                  src={manga.cover_image_url}
+                  src={manga.cover_image}
                   alt={manga.title}
                   fill
                   className="object-cover rounded-lg"
@@ -143,7 +148,7 @@ const MangaDetailPage = ({ params }: { params: { mangaId: string } }) => {
           <Card>
             <CardContent className="p-6">
               <h1 className="text-3xl font-bold mb-2">{manga.title}</h1>
-              
+
               <div className="flex items-center gap-2 mb-4">
                 <User className="w-4 h-4" />
                 <span className="text-sm text-gray-600">
@@ -159,12 +164,7 @@ const MangaDetailPage = ({ params }: { params: { mangaId: string } }) => {
                 ))}
               </div>
 
-              <Badge 
-                
-                className="mb-4"
-              >
-                {manga.status}
-              </Badge>
+              <Badge className="mb-4">{manga.status}</Badge>
 
               <p className="text-gray-700 mb-6">{manga.description}</p>
 
@@ -188,7 +188,9 @@ const MangaDetailPage = ({ params }: { params: { mangaId: string } }) => {
                               Chapter {chapter.chapter_number} - {chapter.title}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {new Date(chapter.release_date).toLocaleDateString()}
+                              {new Date(
+                                chapter.release_date
+                              ).toLocaleDateString()}
                             </div>
                           </div>
                           <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -204,7 +206,7 @@ const MangaDetailPage = ({ params }: { params: { mangaId: string } }) => {
       </div>
     </div>
   );
-}
+};
 
 function LoadingSkeleton() {
   return (
