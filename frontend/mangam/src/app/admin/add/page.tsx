@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Book, User, BookOpen } from "lucide-react";
@@ -18,36 +18,34 @@ const AddPage = () => {
   const [isMangaListOpen, setIsMangaListOpen] = useState(false);
 
   useEffect(() => {
-    // Manga listesini çek
     fetchMangas();
   }, []);
 
   const fetchMangas = async () => {
     try {
-      const response = await fetch('http://localhost:8080/manga');
+      const response = await fetch("http://localhost:8080/manga");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       if (data) {
-        data.manga_id=data.id
-      const MangaList: Manga[] = data.map((manga: any) => ({
-        manga_id: manga.id,
-        title: manga.title,
-        description: manga.description,
-        cover_image_url: manga.cover_image,
-        status: manga.status,
-        author_id: manga.author_id,
-        author_name: manga.author_name,
-        author_bio: manga.author_bio,
-      }))
-      setMangas(MangaList)
-      }
-      else{
-        setMangas([])
+        data.manga_id = data.id;
+        const MangaList: Manga[] = data.map((manga: any) => ({
+          manga_id: manga.id,
+          title: manga.title,
+          description: manga.description,
+          cover_image_url: manga.cover_image,
+          status: manga.status,
+          author_id: manga.author_id,
+          author_name: manga.author_name,
+          author_bio: manga.author_bio,
+        }));
+        setMangas(MangaList);
+      } else {
+        setMangas([]);
       }
     } catch (error) {
-      console.error('Error fetching mangas:', error);
+      console.error("Error fetching mangas:", error);
     }
   };
 
@@ -57,25 +55,24 @@ const AddPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8 mt-16">
-       <Button 
-        className="flex items-center gap-2" 
+      <Button
+        className="flex items-center gap-2"
         variant="outline"
-        onClick={() => router.push('/admin')}
+        onClick={() => router.push("/admin")}
       >
         <span>Return to Admin</span>
       </Button>
       <div className="max-w-6xl mx-auto">
-      
         <h1 className="text-3xl font-bold mb-8">Add Content</h1>
-       
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Add Author Card */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
-              <Button 
+              <Button
                 className="w-full h-32 flex flex-col items-center justify-center gap-2"
                 variant="outline"
-                onClick={() => router.push('add/author')}
+                onClick={() => router.push("add/author")}
               >
                 <User className="h-8 w-8" />
                 <span className="text-lg font-medium">Add Author</span>
@@ -86,10 +83,10 @@ const AddPage = () => {
           {/* Add Manga Card */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
-              <Button 
+              <Button
                 className="w-full h-32 flex flex-col items-center justify-center gap-2"
                 variant="outline"
-                onClick={() => router.push('add/manga')}
+                onClick={() => router.push("add/manga")}
               >
                 <Book className="h-8 w-8" />
                 <span className="text-lg font-medium">Add Manga</span>
@@ -100,7 +97,7 @@ const AddPage = () => {
           {/* Add Chapter Card */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
-              <Button 
+              <Button
                 className="w-full h-32 flex flex-col items-center justify-center gap-2"
                 variant="outline"
                 onClick={() => setIsMangaListOpen(true)}
@@ -120,8 +117,8 @@ const AddPage = () => {
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 max-h-[60vh] overflow-y-auto">
               {mangas.map((manga) => (
-                <Card 
-                  key={manga.manga_id} 
+                <Card
+                  key={manga.manga_id}
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
                   onClick={() => navigateToMangaChapter(manga.manga_id)}
                 >
@@ -131,7 +128,7 @@ const AddPage = () => {
                     </div>
                     <div>
                       <h3 className="font-medium">{manga.title}</h3>
-                     {/*  <p className="text-sm text-gray-500">{manga.chapters || 0} Chapters</p> */}
+                      {/*  <p className="text-sm text-gray-500">{manga.chapters || 0} Chapters</p> */}
                     </div>
                   </CardContent>
                 </Card>

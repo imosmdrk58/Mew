@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -25,33 +26,41 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Error decoding user: %v", err)
 		return
 	}
 
 	if err := h.service.CreateUser(&user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error creating user: %v", err)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
+	log.Printf("User created successfully: %v", user)
 }
 
 func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var credentials LoginCredentials
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Error decoding login credentials: %v", err)
 		return
 	}
 
-	user, err := h.service.LoginUser(credentials.Username, credentials.PasswordHash)
+	log.Printf("Login attempt with Username: %s, Password: %s", credentials.Username, credentials.Password)
+
+	user, err := h.service.LoginUser(credentials.Username, credentials.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
+		log.Printf("Error logging in user: %v", err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
+	log.Printf("User logged in successfully: %v", user)
 }
 
 func (h *UserHandler) GetUserByUsername(w http.ResponseWriter, r *http.Request) {
