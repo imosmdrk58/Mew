@@ -32,7 +32,8 @@ CREATE TABLE manga (
     cover_image VARCHAR(255) DEFAULT '',
     status manga_status NOT NULL,
     published_date DATE DEFAULT NULL,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    rating DECIMAL(3,1) DEFAULT 0.0 CHECK (rating >= 1.0 AND rating <= 5.0)
 );
 
 -- Manga_Authors ilişki tablosu (Many-to-Many)
@@ -215,10 +216,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
 -- view
 
 -- vw_manga_details view oluştur
+DROP VIEW IF EXISTS vw_manga_details;
 CREATE OR REPLACE VIEW vw_manga_details AS
 SELECT 
     m.manga_id, 
@@ -227,12 +228,13 @@ SELECT
     m.status, 
     m.cover_image, 
     m.published_date, 
-    a.author_id, 
-    a.name AS author_name, 
-    a.bio AS author_bio
+    m.rating,
+    COALESCE(a.author_id, 0) as author_id,
+    COALESCE(a.name, '') as author_name,
+    COALESCE(a.bio, '') as author_bio
 FROM 
     manga m
-JOIN 
+LEFT JOIN 
     manga_authors ma ON m.manga_id = ma.manga_id
-JOIN 
+LEFT JOIN 
     authors a ON ma.author_id = a.author_id;

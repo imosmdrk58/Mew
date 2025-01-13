@@ -22,28 +22,38 @@ func NewMangaRepository(db *sql.DB) MangaRepository {
 }
 
 func (r *mangaRepository) GetMangaList(params MangaQueryParams) ([]Manga, error) {
+	// Debug için sorgu parametrelerini yazdır
+	log.Printf("Query params: %+v", params)
+
 	query := `SELECT 
-        manga_id, title, cover_image, description, status, 
-        published_date, author_id, author_name, 
-        author_bio
-        FROM vw_manga_details`
+		m.manga_id, 
+		m.title, 
+		m.cover_image, 
+		m.description, 
+		m.status, 
+		m.published_date, 
+		m.rating, 
+		COALESCE(a.author_id, 0) as author_id,
+		COALESCE(a.name, '') as author_name,
+		COALESCE(a.bio, '') as author_bio
+	FROM manga m
+	LEFT JOIN manga_authors ma ON m.manga_id = ma.manga_id
+	LEFT JOIN authors a ON ma.author_id = a.author_id`
 
 	// Sıralama parametrelerini ekle
 	if params.SortBy != "" {
-		log.Printf("Sorting by %s %s", params.SortBy, params.SortOrder)
-		query += fmt.Sprintf(" ORDER BY %s %s", params.SortBy, params.SortOrder)
+		query += fmt.Sprintf(" ORDER BY m.%s %s", params.SortBy, params.SortOrder)
 	} else {
-		// Varsayılan sıralama
-		query += " ORDER BY published_date DESC"
+		query += " ORDER BY m.published_date DESC"
 	}
 
-	// Limit ve offset ekle
+	// Limit ekle
 	if params.Limit > 0 {
 		query += fmt.Sprintf(" LIMIT %d", params.Limit)
 	}
-	if params.Offset > 0 {
-		query += fmt.Sprintf(" OFFSET %d", params.Offset)
-	}
+
+	// Debug için son sorguyu yazdır
+	log.Printf("Executing query: %s", query)
 
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -55,27 +65,28 @@ func (r *mangaRepository) GetMangaList(params MangaQueryParams) ([]Manga, error)
 	var mangaList []Manga
 	for rows.Next() {
 		var manga Manga
-		if err := rows.Scan(
+		err := rows.Scan(
 			&manga.ID,
 			&manga.Title,
 			&manga.CoverImage,
 			&manga.Description,
 			&manga.Status,
 			&manga.PublishedDate,
+			&manga.Rating,
 			&manga.AuthorId,
 			&manga.AuthorName,
 			&manga.AuthorBio,
-		); err != nil {
+		)
+		if err != nil {
 			log.Printf("Row scan error: %v", err)
 			return nil, err
 		}
+		// Debug için her bir manga kaydını yazdır
+		log.Printf("Found manga: %+v", manga)
 		mangaList = append(mangaList, manga)
 	}
 
-	if len(mangaList) == 0 {
-		log.Println("No manga found in the database.")
-	}
-
+	log.Printf("Total manga found: %d", len(mangaList))
 	return mangaList, nil
 }
 

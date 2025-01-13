@@ -6,6 +6,16 @@ import Link from "next/link";
 
 const categories = ["Tümü", "Shounen", "Shoujo", "Seinen", "Kodomo"];
 
+// Manga tipini tanımlayalım
+interface Manga {
+  manga_id: number;
+  id?: number;  // Eski ID alanı için opsiyonel
+  title: string;
+  cover_image: string;
+  genre?: string;
+  rating: number;
+}
+
 const MangaListPage = () => {
   const [mangaData, setMangaData] = useState<Manga[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -109,7 +119,7 @@ const MangaListPage = () => {
             {filteredManga.map((manga) => (
               <Link
                 href={`/manga/${manga.manga_id ?? manga.id}`}
-                key={manga.id ?? manga.manga_id}
+                key={manga.manga_id ?? manga.id}
                 className="rounded-lg p-2 transition-transform hover:scale-105"
                 style={{
                   backgroundColor: "var(--color-card-background)",
@@ -129,23 +139,23 @@ const MangaListPage = () => {
                   {manga.title}
                 </h3>
                 <div className="flex justify-between items-center mt-1">
+                  {manga.genre && (
+                    <span
+                      className="px-2 py-0.5 rounded-full text-xs"
+                      style={{
+                        background: `linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end))`,
+                        color: "var(--color-text-primary)",
+                      }}
+                    >
+                      {manga.genre}
+                    </span>
+                  )}
                   <span
-                    className="px-2 py-0.5 rounded-full text-xs"
-                    style={{
-                      background: `linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end))`,
-                      color: "var(--color-text-primary)",
-                    }}
-                  >
-                    {manga.genre}
-                  </span>
-                  <span
-                    className="text-xs"
+                    className="text-xs flex items-center gap-1"
                     style={{ color: "var(--color-text-secondary)" }}
                   >
-                    ⭐ {manga.rating}
-                    {manga.rating
-                      ? manga.rating
-                      : (Math.random() * 5).toFixed(1)}
+                    ⭐{" "}
+                    {manga.rating ? (manga.rating * 1).toFixed(1) : "N/A"}
                   </span>
                 </div>
               </Link>
