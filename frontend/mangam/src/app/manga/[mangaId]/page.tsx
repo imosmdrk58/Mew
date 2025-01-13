@@ -41,7 +41,7 @@ const fetchMangaDetail = async (mangaId: string): Promise<Manga> => {
 
     // API'den gelen veriyi Manga tipine dönüştür
     const manga: Manga = {
-      manga_id: data.id,
+      manga_id: data.id ?? data.manga_id,
       title: data.title,
       description: data.description,
       cover_image: data.cover_image,

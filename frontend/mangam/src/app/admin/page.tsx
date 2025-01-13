@@ -23,11 +23,11 @@ const MangaListPage = () => {
 
   const fetchMangas = async () => {
     try {
-      const response = await fetch('http://localhost:8080/manga');
+      const response = await fetch("http://localhost:8080/manga");
       const data = await response.json();
-      data.manga_id=data.id
+      data.manga_id = data.id;
       const MangaList: Manga[] = data.map((manga: any) => ({
-        manga_id: manga.id,
+        manga_id: manga.id ?? manga.manga_id,
         title: manga.title,
         description: manga.description,
         cover_image: manga.cover_image,
@@ -35,17 +35,17 @@ const MangaListPage = () => {
         author: {
           author_id: manga.author_id,
           name: manga.author_name,
-          bio: manga.author_bio
-        }
+          bio: manga.author_bio,
+        },
       }));
       setMangas(MangaList);
     } catch (error) {
-      console.error('Error fetching mangas:', error);
+      console.error("Error fetching mangas:", error);
     }
   };
 
   return (
-    <div className="p-6 mt-16" >
+    <div className="p-6 mt-16">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Manga Yönetimi</h1>
         <Link href="/admin/add">
@@ -69,9 +69,14 @@ const MangaListPage = () => {
         <TableBody>
           {mangas.map((manga) => (
             <TableRow key={manga.manga_id}>
-              <TableCell><Link href={`/manga/${manga.manga_id}`} className="text-blue-600 hover:underline">
+              <TableCell>
+                <Link
+                  href={`/manga/${manga.manga_id}`}
+                  className="text-blue-600 hover:underline"
+                >
                   {manga.title}
-                </Link></TableCell>
+                </Link>
+              </TableCell>
               <TableCell>{manga.author.name}</TableCell>
               <TableCell>{manga.status}</TableCell>
               <TableCell>{manga.published_date}</TableCell>
@@ -91,6 +96,6 @@ const MangaListPage = () => {
       </Table>
     </div>
   );
-}
+};
 
 export default MangaListPage;

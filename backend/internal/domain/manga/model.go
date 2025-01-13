@@ -18,3 +18,10 @@ type Manga struct {
 	Genre         string    `json:"genre"`  // Yeni eklenen alan
 	Rating        float64   `json:"rating"` // Yeni eklenen alan
 }
+
+type MangaQueryParams struct {
+	Limit     int
+	Offset    int
+	SortBy    string
+	SortOrder string // "asc" veya "desc"
+}

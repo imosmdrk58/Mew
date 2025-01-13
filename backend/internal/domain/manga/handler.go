@@ -17,13 +17,23 @@ func NewMangaHandler(service MangaService) *MangaHandler {
 }
 
 func (h *MangaHandler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/manga", h.GetAllManga).Methods("GET")
+	router.HandleFunc("/manga", h.GetMangaList).Methods("GET")
 	router.HandleFunc("/manga/{id}", h.GetMangaByID).Methods("GET")
 	router.HandleFunc("/manga/create-manga", h.CreateManga).Methods("POST")
 }
 
-func (h *MangaHandler) GetAllManga(w http.ResponseWriter, r *http.Request) {
-	mangaList, err := h.service.GetAllManga()
+func (h *MangaHandler) GetMangaList(w http.ResponseWriter, r *http.Request) {
+	// URL parametrelerini al
+	query := r.URL.Query()
+
+	params := MangaQueryParams{
+		Limit:     parseIntParam(query.Get("limit"), 10),      // varsayılan limit 10
+		Offset:    parseIntParam(query.Get("offset"), 0),      // varsayılan offset 0
+		SortBy:    validateSortBy(query.Get("sort_by")),       // sort_by parametresini doğrula
+		SortOrder: validateSortOrder(query.Get("sort_order")), // sort_order parametresini doğrula
+	}
+
+	mangaList, err := h.service.GetMangaList(params)
 	if err != nil {
 		http.Error(w, "Failed to fetch manga list", http.StatusInternalServerError)
 		return
@@ -70,4 +80,36 @@ func (h *MangaHandler) CreateManga(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(manga)
+}
+
+func parseIntParam(param string, defaultValue int) int {
+	if param == "" {
+		return defaultValue
+	}
+	value, err := strconv.Atoi(param)
+	if err != nil {
+		return defaultValue
+	}
+	return value
+}
+
+func validateSortBy(sortBy string) string {
+	validFields := map[string]bool{
+		"last_updated":   true,
+		"published_date": true,
+		"title":          true,
+		"rating":         true,
+	}
+
+	if validFields[sortBy] {
+		return sortBy
+	}
+	return "published_date" // varsayılan sıralama alanı
+}
+
+func validateSortOrder(sortOrder string) string {
+	if sortOrder == "asc" {
+		return "ASC"
+	}
+	return "DESC" // varsayılan sıralama yönü
 }

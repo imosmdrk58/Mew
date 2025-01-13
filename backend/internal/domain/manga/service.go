@@ -1,9 +1,9 @@
 package manga
 
 type MangaService interface {
-	GetAllManga() ([]Manga, error)
+	GetMangaList(params MangaQueryParams) ([]Manga, error)
 	GetMangaByID(id int) (*Manga, error)
-    CreateManga(manga *Manga) error
+	CreateManga(manga *Manga) error
 }
 
 type mangaService struct {
@@ -14,14 +14,14 @@ func NewMangaService(repo MangaRepository) MangaService {
 	return &mangaService{repo: repo}
 }
 
-func (s *mangaService) GetAllManga() ([]Manga, error) {
-	return s.repo.GetAllManga()
-}
-
 func (s *mangaService) GetMangaByID(id int) (*Manga, error) {
 	return s.repo.GetMangaByID(id)
 }
 
 func (s *mangaService) CreateManga(manga *Manga) error {
 	return s.repo.CreateManga(manga)
+}
+
+func (s *mangaService) GetMangaList(params MangaQueryParams) ([]Manga, error) {
+	return s.repo.GetMangaList(params)
 }

@@ -3,11 +3,12 @@ package manga
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 )
 
 type MangaRepository interface {
-	GetAllManga() ([]Manga, error)
+	GetMangaList(params MangaQueryParams) ([]Manga, error)
 	GetMangaByID(id int) (*Manga, error)
 	CreateManga(manga *Manga) error
 }
@@ -20,10 +21,33 @@ func NewMangaRepository(db *sql.DB) MangaRepository {
 	return &mangaRepository{db: db}
 }
 
-func (r *mangaRepository) GetAllManga() ([]Manga, error) {
-	rows, err := r.db.Query("SELECT manga_id, title, cover_image, description FROM vw_manga_details")
+func (r *mangaRepository) GetMangaList(params MangaQueryParams) ([]Manga, error) {
+	query := `SELECT 
+        manga_id, title, cover_image, description, status, 
+        published_date, author_id, author_name, 
+        author_bio
+        FROM vw_manga_details`
+
+	// Sıralama parametrelerini ekle
+	if params.SortBy != "" {
+		log.Printf("Sorting by %s %s", params.SortBy, params.SortOrder)
+		query += fmt.Sprintf(" ORDER BY %s %s", params.SortBy, params.SortOrder)
+	} else {
+		// Varsayılan sıralama
+		query += " ORDER BY published_date DESC"
+	}
+
+	// Limit ve offset ekle
+	if params.Limit > 0 {
+		query += fmt.Sprintf(" LIMIT %d", params.Limit)
+	}
+	if params.Offset > 0 {
+		query += fmt.Sprintf(" OFFSET %d", params.Offset)
+	}
+
+	rows, err := r.db.Query(query)
 	if err != nil {
-		log.Printf("Database query error: %v", err) // Hata detayını logla
+		log.Printf("Database query error: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -36,19 +60,18 @@ func (r *mangaRepository) GetAllManga() ([]Manga, error) {
 			&manga.Title,
 			&manga.CoverImage,
 			&manga.Description,
+			&manga.Status,
+			&manga.PublishedDate,
+			&manga.AuthorId,
+			&manga.AuthorName,
+			&manga.AuthorBio,
 		); err != nil {
-			log.Printf("Row scan error: %v", err) // Tarama hatalarını logla
+			log.Printf("Row scan error: %v", err)
 			return nil, err
 		}
 		mangaList = append(mangaList, manga)
 	}
 
-	// log manga
-	for _, manga := range mangaList {
-		log.Printf("Manga: %v", manga)
-	}
-
-	// Eğer hiç sonuç yoksa bu durumu loglayabilirsiniz
 	if len(mangaList) == 0 {
 		log.Println("No manga found in the database.")
 	}

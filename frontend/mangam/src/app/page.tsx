@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -7,6 +8,30 @@ import Link from "next/link";
 import NavigationBar from "./components/navbar/Navbar";
 
 const MangaWebsite = () => {
+  const [newManga, setNewManga] = useState<Manga[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNewManga = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/manga?limit=6&sort_by=published_date&sort_order=desc`
+        );
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        setNewManga(data);
+      } catch (error) {
+        console.error("Error fetching new manga:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNewManga();
+  }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
       {/* Navigation Bar */}
@@ -23,12 +48,36 @@ const MangaWebsite = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {[1, 2, 3, 4, 5, 6].map((item) => (
-                  <div key={item} className="space-y-2 group cursor-pointer">
-                    <div className="aspect-[3/4] rounded-lg bg-gradient-to-br from-gray-700 to-purple-800 animate-pulse group-hover:scale-105 transition-transform" />
-                    <div className="h-4 bg-gradient-to-r from-gray-700 to-purple-800 rounded animate-pulse w-2/3" />
-                  </div>
-                ))}
+                {isLoading
+                  ? // Loading skeletons
+                    [...Array(6)].map((_, index) => (
+                      <div
+                        key={index}
+                        className="space-y-2 group cursor-pointer"
+                      >
+                        <div className="aspect-[3/4] rounded-lg bg-gradient-to-br from-gray-700 to-purple-800 animate-pulse group-hover:scale-105 transition-transform" />
+                        <div className="h-4 bg-gradient-to-r from-gray-700 to-purple-800 rounded animate-pulse w-2/3" />
+                      </div>
+                    ))
+                  : // Actual manga data
+                    newManga.map((manga) => (
+                      <Link
+                        href={`/manga/${manga.manga_id}`}
+                        key={manga.manga_id}
+                        className="space-y-2 group cursor-pointer"
+                      >
+                        <div className="aspect-[3/4] rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                          <img
+                            src={manga.cover_image}
+                            alt={manga.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <p className="text-sm text-gray-200 truncate">
+                          {manga.title}
+                        </p>
+                      </Link>
+                    ))}
               </div>
             </CardContent>
           </Card>
