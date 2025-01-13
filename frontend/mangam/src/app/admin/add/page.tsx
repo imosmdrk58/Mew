@@ -31,7 +31,7 @@ const AddPage = () => {
       if (data) {
         data.manga_id = data.id;
         const MangaList: Manga[] = data.map((manga: any) => ({
-          manga_id: manga.id,
+          manga_id: manga.manga_id,
           title: manga.title,
           description: manga.description,
           cover_image: manga.cover_image,
