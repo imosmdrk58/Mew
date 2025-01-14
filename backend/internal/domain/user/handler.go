@@ -20,9 +20,10 @@ func NewUserHandler(service *UserService) *UserHandler {
 func (h *UserHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/users/create-user", h.CreateUser).Methods("POST")
 	router.HandleFunc("/users/login", h.LoginUser).Methods("POST")
+	router.HandleFunc("/favorites/add/", h.AddMangaToFavorites).Methods("POST")
+
 	router.HandleFunc("/users/{username}", h.GetUserByUsername).Methods("GET")
 
-	router.HandleFunc("/users/{user_id}/favorites/add/{manga_id}", h.AddMangaToFavorites).Methods("POST")
 	router.HandleFunc("/users/{user_id}/favorites/remove/{manga_id}", h.RemoveMangaFromFavorites).Methods("DELETE")
 	router.HandleFunc("/users/{user_id}/favorites/check/{manga_id}", h.IsMangaFavorited).Methods("GET")
 	router.HandleFunc("/users/{user_id}/favorites", h.GetUserFavorites).Methods("GET")
@@ -126,24 +127,20 @@ func (h *UserHandler) IsMangaFavorited(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) AddMangaToFavorites(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	userID, err := strconv.Atoi(vars["user_id"])
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-	mangaID, err := strconv.Atoi(vars["manga_id"])
-	if err != nil {
-		http.Error(w, "Invalid manga ID", http.StatusBadRequest)
+	var favourite Favourite
+	if err := json.NewDecoder(r.Body).Decode(&favourite); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Error decoding adding favourite manga: %v", err)
 		return
 	}
 
-	if err := h.service.AddMangaToFavorites(userID, mangaID); err != nil {
+	if err := h.service.AddMangaToFavorites(&favourite); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(favourite)
 }
 
 func (h *UserHandler) RemoveMangaFromFavorites(w http.ResponseWriter, r *http.Request) {

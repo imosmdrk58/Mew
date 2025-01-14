@@ -66,32 +66,20 @@ func (r *UserRepository) LoginUser(username, password string) (*User, error) {
 	return user, nil
 }
 
-func (r *UserRepository) AddMangaToFavorites(userID, mangaID int) error {
+func (r *UserRepository) AddMangaToFavorites(favourite *Favourite) error {
 	query := `
 		INSERT INTO user_favorites (user_id, manga_id)
 		VALUES ($1, $2)
 		ON CONFLICT (user_id, manga_id) DO NOTHING
 	`
 
-	result, err := r.db.Exec(query, userID, mangaID)
+	_, err := r.db.Exec(query, favourite.UserID, favourite.MangaID)
 	if err != nil {
 		fmt.Printf("Error adding manga to favorites: %v\n", err)
 		return fmt.Errorf("failed to add manga to favorites: %v", err)
 	}
 
-	// Check if a row was actually inserted
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		fmt.Printf("Error checking rows affected: %v\n", err)
-		return err
-	}
-
-	if rowsAffected == 0 {
-		fmt.Printf("Manga is already in favorites for user_id: %d, manga_id: %d\n", userID, mangaID)
-		return fmt.Errorf("manga is already in favorites")
-	}
-
-	fmt.Printf("Added manga to favorites for user_id: %d, manga_id: %d\n", userID, mangaID)
+	fmt.Printf("Added manga to favorites for user_id: %d, manga_id: %d\n", favourite.UserID, favourite.MangaID)
 	return nil
 }
 
