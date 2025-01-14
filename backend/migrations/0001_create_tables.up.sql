@@ -216,7 +216,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+-- update fonksiyonu
 CREATE OR REPLACE FUNCTION update_manga(
     p_manga_id INTEGER,
     p_title VARCHAR(255),
@@ -253,8 +253,82 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- manga sil fonksiyonu
+CREATE OR REPLACE FUNCTION delete_manga_by_id(manga_id INT)
+RETURNS VOID AS
+$$
+BEGIN
+    -- manga_id'ye göre manga kaydını sil
+    DELETE FROM manga WHERE manga.manga_id = delete_manga_by_id.manga_id;
+    
+    -- Eğer silinen kayıt yoksa kullanıcıya bilgi ver
+    IF NOT FOUND THEN
+        RAISE NOTICE 'Manga with id % not found.', manga_id;
+    END IF;
+END;
+$$
+LANGUAGE plpgsql;
 
+/* çalışmadı bakılıcakk
+-- Trigger fonksiyonu
+CREATE OR REPLACE FUNCTION delete_manga_when_author_deleted()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Önce manga_authors tablosundan ilgili yazarın mangalarını sil
+    DELETE FROM manga_authors WHERE author_id = OLD.author_id;
+    
+    -- Daha sonra, eğer bu yazarın başka bir yazarı yoksa, manga tablosundan da sil
+    DELETE FROM manga WHERE manga_id IN (
+        SELECT manga_id FROM manga_authors WHERE author_id = OLD.author_id
+    );
+    
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
 
+-- Trigger
+CREATE TRIGGER tr_author_delete_manga
+    AFTER DELETE
+    ON authors
+    FOR EACH ROW
+    EXECUTE FUNCTION delete_manga_when_author_deleted();
+*/
+
+/* CREATE OR REPLACE FUNCTION delete_author_and_related_data(p_author_id INTEGER)
+RETURNS VOID AS $$
+DECLARE
+    v_manga_id INTEGER;
+BEGIN
+    -- Yazarın bağlı olduğu mangaları bul ve sil
+    FOR v_manga_id IN 
+        SELECT manga_id FROM manga_authors WHERE author_id = p_author_id
+    LOOP
+        -- Manga ile ilişkili tüm verileri sil
+        DELETE FROM manga_genres WHERE manga_id = v_manga_id;
+        DELETE FROM manga_authors WHERE manga_id = v_manga_id;
+        DELETE FROM user_favorites WHERE manga_id = v_manga_id;
+        DELETE FROM user_reading_progress WHERE manga_id = v_manga_id;
+        DELETE FROM ratings WHERE manga_id = v_manga_id;
+        DELETE FROM manga_ratings WHERE manga_id = v_manga_id;
+
+        -- Manga bölümlerini ve sayfalarını sil
+        DELETE FROM pages WHERE chapter_id IN (SELECT chapter_id FROM chapters WHERE manga_id = v_manga_id);
+        DELETE FROM comments WHERE chapter_id IN (SELECT chapter_id FROM chapters WHERE manga_id = v_manga_id);
+        DELETE FROM chapters WHERE manga_id = v_manga_id;
+
+        -- Manga'yı sil
+        DELETE FROM manga WHERE manga_id = v_manga_id;
+    END LOOP;
+
+    -- Yazarı sil
+    DELETE FROM authors WHERE author_id = p_author_id;
+
+    -- Eğer yazar bulunamazsa kullanıcıya bilgi ver
+    IF NOT FOUND THEN
+        RAISE NOTICE 'Author with id % not found.', p_author_id;
+    END IF;
+END;
+$$ LANGUAGE plpgsql; */
 
 
 -- view

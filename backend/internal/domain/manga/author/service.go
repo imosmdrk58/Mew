@@ -8,6 +8,8 @@ type AuthorService interface {
 	CreateAuthor(author *Author) error
 	GetMangaByAuthorID(authorID int) ([]manga.Manga, error)
 	GetAuthorByMangaID(mangaID int) (*Author, error)
+	UpdateAuthor(author *Author) error
+	DeleteAuthor(authorID int) error
 }
 
 type authorService struct {
@@ -36,4 +38,12 @@ func (s *authorService) GetMangaByAuthorID(authorID int) ([]manga.Manga, error) 
 
 func (s *authorService) GetAuthorByMangaID(mangaID int) (*Author, error) {
 	return s.repo.GetAuthorByMangaID(mangaID)
+}
+
+func (s *authorService) UpdateAuthor(author *Author) error {
+	return s.repo.UpdateAuthor(author)
+}
+
+func (s *authorService) DeleteAuthor(authorID int) error {
+	return s.repo.DeleteAuthor(authorID)
 }

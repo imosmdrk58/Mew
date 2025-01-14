@@ -12,6 +12,8 @@ type AuthorRepository interface {
 	CreateAuthor(author *Author) error
 	GetMangaByAuthorID(authorID int) ([]manga.Manga, error)
 	GetAuthorByMangaID(mangaID int) (*Author, error)
+	UpdateAuthor(author *Author) error
+	DeleteAuthor(authorID int) error
 }
 
 type authorRepository struct {
@@ -100,4 +102,15 @@ func (r *authorRepository) GetAuthorByMangaID(mangaID int) (*Author, error) {
 	}
 
 	return &author, nil
+}
+
+func (r *authorRepository) UpdateAuthor(author *Author) error {
+	_, err := r.db.Exec("UPDATE authors SET name = $1, bio = $2 WHERE author_id = $3",
+		author.Name, author.Bio, author.AuthorID)
+	return err
+}
+
+func (r *authorRepository) DeleteAuthor(authorID int) error {
+	_, err := r.db.Exec("SELECT delete_author_and_related_data($1)", authorID)
+	return err
 }

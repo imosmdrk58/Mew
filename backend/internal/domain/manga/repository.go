@@ -134,7 +134,7 @@ func (r *mangaRepository) UpdateManga(manga *Manga) error {
 
 func (r *mangaRepository) DeleteManga(id int) error {
 	log.Printf("Deleting manga with ID: %d", id)
-	_, err := r.db.Exec("SELECT delete_manga($1)", id)
+	_, err := r.db.Exec("SELECT delete_manga_by_id($1)", id)
 	if err != nil {
 		log.Printf("Error deleting manga: %v", err)
 		return err

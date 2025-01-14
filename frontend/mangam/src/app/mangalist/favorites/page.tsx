@@ -11,9 +11,24 @@ import { Button } from "@/components/ui/button";
 
 
 
-const handleRemoveFromFavorites = (mangaId: string) => {
-    // Burada favori kaldırma işlemi yapılacak
-    console.log(`Removing manga with id: ${mangaId}`);
+const handleRemoveFromFavorites = async (userId: string, mangaId: string) => {
+    const sentData = {
+        manga_id: parseInt(mangaId),
+        user_id: parseInt(userId),
+      };
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}favorites/remove`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(sentData),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to remove from favorites");
+      }
   };
 
 const FavoritesPage = () => {
@@ -30,18 +45,21 @@ const FavoritesPage = () => {
             try{
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}favorites/user/${userId}`);
             const data = await response.json();
-            const mangas = data.map((manga: any) => ({
-                manga_id: manga.manga_id,
-                title: manga.title,
-                description: manga.description,
-                cover_image: manga.cover_image,
-                status: manga.status,
-                published_date: manga.published_date,
-                last_updated: manga.last_updated,
-                rating: manga.rating,
-            }));
-            setUserFavoriteMangas(data);
-               
+            if (data) {
+                const mangas = data.map((manga: any) => ({
+                    manga_id: manga.manga_id,
+                    title: manga.title,
+                    description: manga.description,
+                    cover_image: manga.cover_image,
+                    status: manga.status,
+                    published_date: manga.published_date,
+                    last_updated: manga.last_updated,
+                    rating: manga.rating,
+                }));
+                
+            setUserFavoriteMangas(mangas);
+            }
+            
         } catch (err) {
             console.error(err);
         } finally {
@@ -52,7 +70,21 @@ const FavoritesPage = () => {
         fetchFavorites();
     }, [userId]);
 
+    const handleRemoveAndUpdate = async (userId: string, mangaId: string) => {
+        try {
+            await handleRemoveFromFavorites(userId, mangaId);
+            // Frontend'den manga'yı kaldır
+            setUserFavoriteMangas((prevMangas) => 
+                prevMangas ? prevMangas.filter(manga => manga.manga_id.toString() !== mangaId) : null
+            );
+        } catch (error) {
+            console.error("Failed to remove manga from favorites:", error);
+            // Opsiyonel: Kullanıcıya bir hata mesajı gösterilebilir
+        }
+    };
 
+
+    if (!userId) return <ErrorPage errorMessage="No logged in" />;
     if (!userFavoriteMangas) return <ErrorPage errorMessage="No favourite manga" />;
     if (isLoading) return <LoadingSpinner />;
 
@@ -86,7 +118,7 @@ const FavoritesPage = () => {
                         size="sm"
                         onClick={(e) => {
                             e.preventDefault();
-                            handleRemoveFromFavorites(manga.manga_id.toString());
+                            handleRemoveAndUpdate(userId.toString(),manga.manga_id.toString());
                         }}
                         >
                         <Trash2 className="w-4 h-4 mr-2" />

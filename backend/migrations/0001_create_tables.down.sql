@@ -4,7 +4,20 @@ DROP VIEW IF EXISTS vw_user_favorite_manga_details;
 
 DROP TRIGGER IF EXISTS tr_chapter_update_manga ON chapters;
 
+-- Trigger'ı sil
+
 DROP FUNCTION IF EXISTS update_manga_last_updated_on_chapter();
+
+/* çalışmadı bakılcak
+-- Trigger'ı sil
+DROP TRIGGER IF EXISTS tr_author_delete_manga ON authors;
+
+-- Fonksiyonu sil
+DROP FUNCTION IF EXISTS delete_manga_when_author_deleted();
+*/
+
+-- Fonksiyonu sil
+ DROP FUNCTION IF EXISTS delete_author_and_related_data(INTEGER);
 
 -- get manga details fonksiyonunu sil
 DROP FUNCTION IF EXISTS get_manga_details(INTEGER);
@@ -18,7 +31,10 @@ DROP FUNCTION IF EXISTS add_manga_with_author(VARCHAR(255), TEXT,manga_status,VA
 -- insert_page fonksiyonunu sil
 DROP FUNCTION IF EXISTS insert_page(INTEGER, INTEGER,VARCHAR(255));
 
--- update manga
+-- delete manga fonksiyonunu sil
+DROP FUNCTION IF EXISTS delete_manga_by_id(INTEGER);
+
+-- update manga fonksiyonunu sil
 DROP FUNCTION update_manga(INTEGER, VARCHAR(255), TEXT, manga_status, VARCHAR(255), INTEGER, DATE);
 
 -- Comments tablosunu sil

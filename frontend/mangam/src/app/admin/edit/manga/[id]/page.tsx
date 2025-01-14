@@ -151,7 +151,7 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!hasChanges) {
-      router.push("/admin/manga");
+      router.push("/admin");
       return;
     }
 
@@ -186,7 +186,7 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
         throw new Error(errorResponse.message || "Unknown error");
       }
 
-      router.push("/admin/manga");
+      router.push("/admin");
     } catch (error) {
       console.error("Error updating manga:", error);
       setSubmitError("Manga güncellenirken bir hata oluştu.");
