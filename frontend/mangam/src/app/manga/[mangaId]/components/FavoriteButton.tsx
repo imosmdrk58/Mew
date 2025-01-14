@@ -18,7 +18,7 @@ export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
     const checkFavoriteStatus = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/favorites/check/${mangaId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/favorites/user/${userId}/manga/${mangaId}`,
           {
             method: "GET",
           }
@@ -45,27 +45,31 @@ export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
     setIsLoading(true);
 
     try {
+      const sentData = {
+        manga_id: parseInt(mangaId),
+        user_id: userId,
+      };
       if (isFavorited) {
-        // Favorilerden kaldır
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/favorites/remove/${mangaId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}favorites/remove`,
           {
             method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(sentData),
           }
         );
-
         if (!response.ok) {
           throw new Error("Failed to remove from favorites");
         }
+
       } else {
         // Favorilere ekle
-        const sentData = {  
-          manga_id: parseInt(mangaId),
-          user_id: userId,
-        };
+       
         console.log("sent ", JSON.stringify(sentData));
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/favorites/add/`,
+          `${process.env.NEXT_PUBLIC_API_URL}favorites/add`,
           {
             method: "POST",
             headers: {
@@ -97,12 +101,12 @@ export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
     >
       {isFavorited ? (
         <>
-          <Heart className="w-5 h-5 fill-current" />
+        <HeartOff className="w-5 h-5" />
           Remove from Favorites
         </>
       ) : (
         <>
-          <HeartOff className="w-5 h-5" />
+          <Heart className="w-5 h-5 fill-current" />
           Add to Favorites
         </>
       )}

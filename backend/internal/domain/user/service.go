@@ -24,8 +24,8 @@ func (s *UserService) AddMangaToFavorites(favourite *Favourite) error {
 	return s.repo.AddMangaToFavorites(favourite)
 }
 
-func (s *UserService) RemoveMangaFromFavorites(userID, mangaID int) error {
-	return s.repo.RemoveMangaFromFavorites(userID, mangaID)
+func (s *UserService) RemoveMangaFromFavorites(favourite *Favourite) error {
+	return s.repo.RemoveMangaFromFavorites(favourite)
 }
 
 func (s *UserService) IsMangaFavorited(userID, mangaID int) (bool, error) {
@@ -47,5 +47,3 @@ func (s *UserService) ChangeUserRole(username string, isAdmin bool) error {
 func (s *UserService) GetAllUsers() ([]User, error) {
 	return s.repo.GetAllUsers()
 }
-
-

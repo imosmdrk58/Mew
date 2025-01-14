@@ -17,6 +17,7 @@ type LoginCredentials struct {
 }
 
 type Favourite struct {
-	MangaID int `json:"manga_id"`
-	UserID  int `json:"user_id"`
+	MangaID      int       `json:"manga_id"`
+	UserID       int       `json:"user_id"`
+	FavouritedAt time.Time `json:"favourited_at"`
 }
