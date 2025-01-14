@@ -33,7 +33,7 @@ CREATE TABLE manga (
     status manga_status NOT NULL,
     published_date DATE DEFAULT NULL,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    rating DECIMAL(3,1) DEFAULT 0.0 CHECK (rating >= 1.0 AND rating <= 5.0)
+    rating DECIMAL(3,1) DEFAULT 0.0 CHECK (rating = 0.0 OR (rating >= 1.0 AND rating <= 5.0))
 );
 
 -- Manga_Authors ilişki tablosu (Many-to-Many)

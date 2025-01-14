@@ -11,6 +11,8 @@ type MangaRepository interface {
 	GetMangaList(params MangaQueryParams) ([]Manga, error)
 	GetMangaByID(id int) (*Manga, error)
 	CreateManga(manga *Manga) error
+	UpdateManga(manga *Manga) error
+	DeleteManga(id int) error
 }
 
 type mangaRepository struct {
@@ -105,7 +107,36 @@ func (r *mangaRepository) GetMangaByID(id int) (*Manga, error) {
 }
 
 func (r *mangaRepository) CreateManga(manga *Manga) error {
+	log.Printf("Creating manga: %+v", manga)
 	_, err := r.db.Exec("SELECT add_manga_with_author($1,$2,$3,$4,$5,$6)",
 		manga.Title, manga.Description, manga.Status, manga.CoverImage, manga.AuthorId, manga.PublishedDate)
-	return err
+	if err != nil {
+		log.Printf("Error creating manga: %v", err)
+		return err
+	}
+	log.Printf("Manga created successfully")
+	return nil
+}
+
+func (r *mangaRepository) UpdateManga(manga *Manga) error {
+	log.Printf("Updating manga: %+v", manga)
+	_, err := r.db.Exec("SELECT update_manga($1,$2,$3,$4,$5,$6)",
+		manga.ID, manga.Title, manga.Description, manga.Status, manga.CoverImage, manga.AuthorId, manga.PublishedDate)
+	if err != nil {
+		log.Printf("Error updating manga: %v", err)
+		return err
+	}
+	log.Printf("Manga updated successfully")
+	return nil
+}
+
+func (r *mangaRepository) DeleteManga(id int) error {
+	log.Printf("Deleting manga with ID: %d", id)
+	_, err := r.db.Exec("SELECT delete_manga($1)", id)
+	if err != nil {
+		log.Printf("Error deleting manga: %v", err)
+		return err
+	}
+	log.Printf("Manga deleted successfully")
+	return nil
 }
