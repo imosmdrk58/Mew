@@ -2,6 +2,10 @@ DROP VIEW IF EXISTS vw_manga_details;
 
 DROP VIEW IF EXISTS vw_user_favorite_manga_details;
 
+DROP TRIGGER IF EXISTS tr_chapter_update_manga ON chapters;
+
+DROP FUNCTION IF EXISTS update_manga_last_updated_on_chapter();
+
 -- get manga details fonksiyonunu sil
 DROP FUNCTION IF EXISTS get_manga_details(INTEGER);
 

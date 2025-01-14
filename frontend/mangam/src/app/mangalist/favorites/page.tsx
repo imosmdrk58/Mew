@@ -29,9 +29,7 @@ const FavoritesPage = () => {
         const fetchFavorites = async () => {
             try{
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}favorites/user/${userId}`);
-            console.log(response.ok);
             const data = await response.json();
-            console.log(data);
             const mangas = data.map((manga: any) => ({
                 manga_id: manga.manga_id,
                 title: manga.title,

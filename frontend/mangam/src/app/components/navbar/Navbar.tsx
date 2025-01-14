@@ -74,6 +74,7 @@ const NavigationBar = () => {
                 </Button>
               </Link>
               {user && (
+                <Link href="/mangalist/favorites">
                 <Button
                   variant="ghost"
                   className="flex items-center space-x-2 text-gray-300 hover:text-pink-400 hover:bg-gray-800"
@@ -81,6 +82,7 @@ const NavigationBar = () => {
                   <Heart className="h-4 w-4" />
                   <span>Favorites</span>
                 </Button>
+                </Link>
               )}
             </div>
           </div>
