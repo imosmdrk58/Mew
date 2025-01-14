@@ -54,7 +54,7 @@ const AddMangaPage = () => {
   useEffect(() => {
     const fetchAuthors = async () => {
       try {
-        const response = await fetch('http://localhost:8080/authors');
+        const response = await fetch("http://localhost:8080/authors");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -66,13 +66,11 @@ const AddMangaPage = () => {
             bio: author.bio,
           }));
           setAuthors(newAuthors);
-        }
-        else
-        {
+        } else {
           setAuthors([]);
         }
       } catch (error) {
-        console.error('Error fetching authors:', error);
+        console.error("Error fetching authors:", error);
       } finally {
         setIsLoading(false);
       }
@@ -95,103 +93,116 @@ const AddMangaPage = () => {
         status: formData.status,
         cover_image: formData.coverImage,
         author_id: formData.authorId,
-        published_date: formData.publishedDate, // Yeni eklenen alan
+        published_date: formData.publishedDate,
       };
 
-      console.log('Form submitted with values:', JSON.stringify(data));
+      console.log("Form submitted with values:", JSON.stringify(data));
 
-      const response = await fetch('http://localhost:8080/manga/create-manga', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8080/manga/create-manga", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
 
+      console.log("API response status:", response.status);
+
       if (!response.ok) {
         const errorResponse = await response.json();
-        throw new Error(`API call failed: ${errorResponse.message || 'Unknown error'}`);
+        throw new Error(
+          `API call failed: ${errorResponse.message || "Unknown error"}`
+        );
       }
 
       const result = await response.json();
-      console.log('API response:', result);
+      console.log("API response:", result);
 
       router.push(`/admin/add`);
     } catch (error) {
-      console.error('Error submitting form:', error);
-      setSubmitError('Form gönderilirken bir hata oluştu.');
+      console.error("Error submitting form:", error);
+      setSubmitError("Form gönderilirken bir hata oluştu.");
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 p-6">
-      <Card className="max-w-2xl mx-auto shadow-xl hover:shadow-2xl transition-shadow duration-300 border-none">
-        <CardHeader className="bg-gradient-to-r from-violet-500 to-indigo-500 text-white rounded-t-lg">
-          <CardTitle className="text-2xl font-bold tracking-tight">
-            ✨ Manga Ekle
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-8">
+      <Card className="max-w-3xl mx-auto bg-white shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+        <CardHeader className="space-y-1 border-b border-gray-100 p-6">
+          <CardTitle className="text-2xl font-medium text-gray-900">
+            Yeni Manga Ekle
           </CardTitle>
+          <p className="text-sm text-gray-500">
+            Manga koleksiyonunuza yeni bir eser ekleyin
+          </p>
         </CardHeader>
-        <CardContent className="p-6 space-y-6">
+
+        <CardContent className="p-6 space-y-8">
           {submitError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-              {submitError}
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+              <p className="text-red-700 text-sm">{submitError}</p>
             </div>
           )}
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
-                      Başlık
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        className="h-11 rounded-lg border-gray-200 focus:border-violet-500 focus:ring-violet-500 transition-all duration-200"
-                        placeholder="Manga başlığını girin..."
-                      />
-                    </FormControl>
-                    <FormMessage className="text-red-500" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="authorId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
-                      Yazar
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={isLoading}
-                    >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700">
+                        Başlık
+                      </FormLabel>
                       <FormControl>
-                        <SelectTrigger className="h-11 rounded-lg border-gray-200 focus:border-violet-500 focus:ring-violet-500">
-                          <SelectValue placeholder="Yazar seçin" />
-                        </SelectTrigger>
+                        <Input
+                          {...field}
+                          className="h-10 rounded-md border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-colors"
+                          placeholder="Manga başlığı..."
+                        />
                       </FormControl>
-                      <SelectContent className="bg-white rounded-lg shadow-lg border-gray-200">
-                        {authors.map((author) => (
-                          <SelectItem
-                            key={author.author_id}
-                            value={author.author_id.toString()}
-                            className="hover:bg-violet-50"
-                          >
-                            {author.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-red-500" />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage className="text-red-500 text-xs" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="authorId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700">
+                        Yazar
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={isLoading}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 rounded-md border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400">
+                            <SelectValue placeholder="Yazar seçin" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-white rounded-md shadow-lg">
+                          {authors.map((author) => (
+                            <SelectItem
+                              key={author.author_id}
+                              value={author.author_id.toString()}
+                              className="hover:bg-gray-50"
+                            >
+                              {author.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-red-500 text-xs" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
                 name="description"
@@ -201,109 +212,101 @@ const AddMangaPage = () => {
                       Açıklama
                     </FormLabel>
                     <FormControl>
-                      <Input
+                      <textarea
                         {...field}
-                        className="h-11 rounded-lg border-gray-200 focus:border-violet-500 focus:ring-violet-500 transition-all duration-200"
-                        placeholder="Manga açıklamasını girin..."
+                        className="w-full h-24 rounded-md border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-colors resize-none"
+                        placeholder="Manga hakkında kısa bir açıklama..."
                       />
                     </FormControl>
-                    <FormMessage className="text-red-500" />
+                    <FormMessage className="text-red-500 text-xs" />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="publishedDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
-                      Yayın Tarihi
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="date"
-                        className="h-11 rounded-lg border-gray-200 focus:border-violet-500 focus:ring-violet-500 transition-all duration-200"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-red-500" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
-                      Durum
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="publishedDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700">
+                        Yayın Tarihi
+                      </FormLabel>
                       <FormControl>
-                        <SelectTrigger className="h-11 rounded-lg border-gray-200 focus:border-violet-500 focus:ring-violet-500">
-                          <SelectValue placeholder="Durum seçin" />
-                        </SelectTrigger>
+                        <Input
+                          {...field}
+                          type="date"
+                          className="h-10 rounded-md border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+                        />
                       </FormControl>
-                      <SelectContent className="bg-white rounded-lg shadow-lg border-gray-200">
-                        <SelectItem
-                          value="ongoing"
-                          className="hover:bg-violet-50"
-                        >
-                          Devam Ediyor
-                        </SelectItem>
-                        <SelectItem
-                          value="completed"
-                          className="hover:bg-violet-50"
-                        >
-                          Tamamlandı
-                        </SelectItem>
-                        <SelectItem
-                          value="dropped"
-                          className="hover:bg-violet-50"
-                        >
-                          Bırakıldı
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-red-500" />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage className="text-red-500 text-xs" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700">
+                        Durum
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 rounded-md border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400">
+                            <SelectValue placeholder="Durum seçin" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="ongoing">Devam Ediyor</SelectItem>
+                          <SelectItem value="completed">Tamamlandı</SelectItem>
+                          <SelectItem value="dropped">Bırakıldı</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-red-500 text-xs" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
                 name="coverImage"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">
-                      Kapak Görseli (Opsiyonel)
+                      Kapak Görseli URL
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        className="h-11 rounded-lg border-gray-200 focus:border-violet-500 focus:ring-violet-500 transition-all duration-200"
-                        placeholder="Kapak görseli URL'sini girin..."
+                        className="h-10 rounded-md border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+                        placeholder="https://..."
                       />
                     </FormControl>
-                    <FormMessage className="text-red-500" />
+                    <FormMessage className="text-red-500 text-xs" />
                   </FormItem>
                 )}
               />
-              
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-600 hover:to-indigo-600 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-              >
-                Manga Ekle
-              </Button>
+
+              <div className="pt-4">
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 rounded-md transition-colors duration-200"
+                >
+                  Kaydet
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>
       </Card>
     </div>
   );
-}
+};
 
 export default AddMangaPage;

@@ -19,7 +19,10 @@ func NewMangaHandler(service MangaService) *MangaHandler {
 func (h *MangaHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/manga", h.GetMangaList).Methods("GET")
 	router.HandleFunc("/manga/{id}", h.GetMangaByID).Methods("GET")
+	router.HandleFunc("/manga/{id}", h.UpdateManga).Methods("PUT")
+	router.HandleFunc("/manga/{id}", h.DeleteManga).Methods("DELETE")
 	router.HandleFunc("/manga/create-manga", h.CreateManga).Methods("POST")
+
 }
 
 func (h *MangaHandler) GetMangaList(w http.ResponseWriter, r *http.Request) {
@@ -80,6 +83,38 @@ func (h *MangaHandler) CreateManga(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(manga)
+}
+
+func (h *MangaHandler) UpdateManga(w http.ResponseWriter, r *http.Request) {
+	var manga Manga
+	if err := json.NewDecoder(r.Body).Decode(&manga); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.UpdateManga(&manga); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(manga)
+}
+
+func (h *MangaHandler) DeleteManga(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid manga ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.DeleteManga(id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func parseIntParam(param string, defaultValue int) int {

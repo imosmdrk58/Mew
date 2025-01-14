@@ -31,8 +31,8 @@ export default function RootLayout({
       >
         <AuthProvider>
           <NavigationBar />
-
-          {children}
+          {/* NavigationBar'ın yüksekliği kadar padding-top ekleyin */}
+          <main className="pt-16">{children}</main>
         </AuthProvider>
       </body>
     </html>
