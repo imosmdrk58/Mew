@@ -1,6 +1,9 @@
 // app/manga/[mangaId]/page.tsx
+"use client";
 
+import { use } from "react";
 import { MangaDetailPage } from "./components/MangaPage";
+import { useParams } from "next/navigation";
 
 interface PageProps {
   params: {
@@ -9,6 +12,7 @@ interface PageProps {
 }
 
 const Page = ({ params }: PageProps) => {
+  params = useParams();
   return <MangaDetailPage mangaId={params.mangaId} />;
 };
 

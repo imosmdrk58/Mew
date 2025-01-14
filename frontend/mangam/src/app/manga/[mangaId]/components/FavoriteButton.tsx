@@ -59,16 +59,26 @@ export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
         }
       } else {
         // Favorilere ekle
+        const sentData = {  
+          manga_id: parseInt(mangaId),
+          user_id: userId,
+        };
+        console.log("sent ", JSON.stringify(sentData));
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/favorites/add/${mangaId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/favorites/add/`,
           {
             method: "POST",
-          }
-        );
-
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(sentData),
+          });
+          const data = await response.json();
+          console.log(data);
         if (!response.ok) {
           throw new Error("Failed to add to favorites");
         }
+        
       }
       setIsFavorited(!isFavorited);
     } catch (error) {

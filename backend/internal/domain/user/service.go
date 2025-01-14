@@ -20,8 +20,8 @@ func (s *UserService) GetUserByUsername(username string) (*User, error) {
 	return s.repo.GetUserByUsername(username)
 }
 
-func (s *UserService) AddMangaToFavorites(userID, mangaID int) error {
-	return s.repo.AddMangaToFavorites(userID, mangaID)
+func (s *UserService) AddMangaToFavorites(favourite *Favourite) error {
+	return s.repo.AddMangaToFavorites(favourite)
 }
 
 func (s *UserService) RemoveMangaFromFavorites(userID, mangaID int) error {

@@ -15,3 +15,8 @@ type LoginCredentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
+type Favourite struct {
+	MangaID int `json:"manga_id"`
+	UserID  int `json:"user_id"`
+}
