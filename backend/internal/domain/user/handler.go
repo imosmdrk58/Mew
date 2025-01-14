@@ -20,7 +20,7 @@ func NewUserHandler(service *UserService) *UserHandler {
 func (h *UserHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/users/create-user", h.CreateUser).Methods("POST")
 	router.HandleFunc("/users/login", h.LoginUser).Methods("POST")
-	router.HandleFunc("/favorites/add/", h.AddMangaToFavorites).Methods("POST")
+	router.HandleFunc("/favorites/add", h.AddMangaToFavorites).Methods("POST")
 
 	router.HandleFunc("/users/{username}", h.GetUserByUsername).Methods("GET")
 
