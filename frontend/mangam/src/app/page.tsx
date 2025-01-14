@@ -25,29 +25,35 @@ const MangaHomepage = () => {
         }
 
         const [newResponse, popularResponse] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga?limit=6&sort_by=published_date&sort_order=desc`, {
-            headers: {
-              'Accept': 'application/json',
-            },
-          }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga?limit=6&sort_by=rating&sort_order=desc`, {
-            headers: {
-              'Accept': 'application/json',
-            },
-          })
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/manga?limit=6&sort_by=published_date&sort_order=desc`,
+            {
+              headers: {
+                Accept: "application/json",
+              },
+            }
+          ),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/manga?limit=6&sort_by=rating&sort_order=desc`,
+            {
+              headers: {
+                Accept: "application/json",
+              },
+            }
+          ),
         ]);
 
         if (!newResponse.ok || !popularResponse.ok) {
-          console.error('New Response Status:', newResponse.status);
-          console.error('Popular Response Status:', popularResponse.status);
+          console.error("New Response Status:", newResponse.status);
+          console.error("Popular Response Status:", popularResponse.status);
           throw new Error("Network response was not ok");
         }
 
         const newData = await newResponse.json();
         const popularData = await popularResponse.json();
 
-        console.log('New Manga Data:', newData);
-        console.log('Popular Manga Data:', popularData);
+        console.log("New Manga Data:", newData);
+        console.log("Popular Manga Data:", popularData);
 
         setNewManga(Array.isArray(newData) ? newData : []);
         setPopularManga(Array.isArray(popularData) ? popularData : []);
@@ -86,13 +92,11 @@ const MangaHomepage = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p className="text-sm text-gray-200 truncate">
-                {manga.title}
-              </p>
+              <p className="text-sm text-gray-200 truncate">{manga.title}</p>
               <div className="flex items-center space-x-1">
                 <Star className="w-4 h-4 text-yellow-500" fill="currentColor" />
                 <span className="text-xs text-gray-400">
-                  {manga.rating ? manga.rating.toFixed(1) : 'N/A'}
+                  {manga.rating ? manga.rating.toFixed(1) : "N/A"}
                 </span>
               </div>
             </Link>
