@@ -16,7 +16,7 @@ export const MangaDetailPage = ({ mangaId }: { mangaId: string }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const username = useAuthStore((state) => state.user?.username);
+  const userId = useAuthStore((state) => state.user?.userId);
 
   useEffect(() => {
     const fetchManga = async () => {
@@ -47,7 +47,7 @@ export const MangaDetailPage = ({ mangaId }: { mangaId: string }) => {
           <Card>
             <CardContent className="p-6">
               <div className="flex justify-end mt-4">
-                <FavoriteButton mangaId={mangaId} username={username} />
+                <FavoriteButton mangaId={mangaId} userId={userId} />
               </div>
               <MangaDetails
                 title={manga.title}

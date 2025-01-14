@@ -7,10 +7,10 @@ import { Heart, HeartOff } from "lucide-react";
 
 interface FavoriteButtonProps {
   mangaId: string;
-  username?: string; // You'll need to pass the current user's username
+  userId?: string; // username yerine userId kullanıyoruz
 }
 
-export const FavoriteButton = ({ mangaId, username }: FavoriteButtonProps) => {
+export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,7 +18,7 @@ export const FavoriteButton = ({ mangaId, username }: FavoriteButtonProps) => {
     const checkFavoriteStatus = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/${username}/favorites/${mangaId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/favorites/check/${mangaId}`,
           {
             method: "GET",
           }
@@ -29,31 +29,28 @@ export const FavoriteButton = ({ mangaId, username }: FavoriteButtonProps) => {
         }
 
         const data = await response.json();
-        setIsFavorited(data);
+        setIsFavorited(data.is_favorited); // API'den dönen yapıya göre düzeltildi
       } catch (error) {
         console.error("Error checking favorite status:", error);
       }
     };
 
-    if (username && mangaId) {
+    if (userId && mangaId) {
       checkFavoriteStatus();
     }
-  }, [mangaId, username]);
+  }, [mangaId, userId]);
 
   const handleToggleFavorite = async () => {
-    if (!username) return; // Kullanıcı oturum açmamışsa işlem yapılmaz
+    if (!userId) return;
     setIsLoading(true);
 
     try {
       if (isFavorited) {
         // Favorilerden kaldır
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/${username}/favorites/${mangaId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/favorites/remove/${mangaId}`,
           {
             method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
           }
         );
 
@@ -62,20 +59,12 @@ export const FavoriteButton = ({ mangaId, username }: FavoriteButtonProps) => {
         }
       } else {
         // Favorilere ekle
-
-        console.log("hjere", mangaId);
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/${username}/favorites/add`,
+          `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/favorites/add/${mangaId}`,
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ mangaId }),
           }
         );
-
-        console.log("response", response);
 
         if (!response.ok) {
           throw new Error("Failed to add to favorites");
