@@ -18,6 +18,9 @@ DROP FUNCTION IF EXISTS add_manga_with_author(VARCHAR(255), TEXT,manga_status,VA
 -- insert_page fonksiyonunu sil
 DROP FUNCTION IF EXISTS insert_page(INTEGER, INTEGER,VARCHAR(255));
 
+-- update manga
+DROP FUNCTION update_manga(INTEGER, VARCHAR(255), TEXT, manga_status, VARCHAR(255), INTEGER, DATE);
+
 -- Comments tablosunu sil
 DROP TABLE IF EXISTS comments CASCADE;
 

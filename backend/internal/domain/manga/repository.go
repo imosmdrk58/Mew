@@ -122,7 +122,7 @@ func (r *mangaRepository) CreateManga(manga *Manga) error {
 
 func (r *mangaRepository) UpdateManga(manga *Manga) error {
 	log.Printf("Updating manga: %+v", manga)
-	_, err := r.db.Exec("SELECT update_manga($1,$2,$3,$4,$5,$6)",
+	_, err := r.db.Exec("SELECT update_manga($1,$2,$3,$4,$5,$6,$7)",
 		manga.ID, manga.Title, manga.Description, manga.Status, manga.CoverImage, manga.AuthorId, manga.PublishedDate)
 	if err != nil {
 		log.Printf("Error updating manga: %v", err)

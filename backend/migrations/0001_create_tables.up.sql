@@ -216,6 +216,47 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION update_manga(
+    p_manga_id INTEGER,
+    p_title VARCHAR(255),
+    p_description TEXT,
+    p_status manga_status,
+    p_cover_image VARCHAR(255),
+    p_author_id INTEGER,
+    p_published_date DATE
+) RETURNS VOID AS $$
+BEGIN
+    
+    UPDATE manga
+    SET
+        title = p_title,
+        description = p_description,
+        status = p_status,
+        cover_image = p_cover_image,
+        published_date = p_published_date,
+        last_updated = CURRENT_TIMESTAMP
+    WHERE
+        manga_id = p_manga_id;
+
+    
+    IF EXISTS (SELECT 1 FROM manga_authors WHERE manga_id = p_manga_id AND author_id = p_author_id) THEN
+        
+        RETURN;
+    ELSE
+        -- 2 side pk oldugu icin
+        DELETE FROM manga_authors WHERE manga_id = p_manga_id;
+        
+        INSERT INTO manga_authors (manga_id, author_id)
+        VALUES (p_manga_id, p_author_id);
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+
 -- view
 
 -- vw_manga_details view oluştur

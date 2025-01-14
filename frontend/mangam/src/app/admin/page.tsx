@@ -95,7 +95,7 @@ const MangaListPage = () => {
               <TableCell>{manga.status}</TableCell>
               <TableCell>{manga.published_date}</TableCell>
               <TableCell className="space-x-2">
-                <Link href={`/dashboard/manga/edit/${manga.manga_id}`}>
+                <Link href={`/admin/edit/manga/${manga.manga_id}`}>
                   <Button variant="outline" size="icon">
                     <Edit className="h-4 w-4" />
                   </Button>
