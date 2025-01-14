@@ -15,7 +15,7 @@ const NavigationBar = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
             {/* Site Name */}
-            <Link href={user?.is_admin ? "/admin" : "/"}>
+            <Link href="/">
               <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent cursor-pointer">
                 MangaVerse
               </h1>
@@ -55,7 +55,11 @@ const NavigationBar = () => {
 
             {/* Conditional rendering based on user state */}
             {user ? (
-              <span className="text-gray-200">{user.username}</span>
+              <Link href="/profile">
+                <span className="text-gray-200 hover:text-purple-400 cursor-pointer transition-colors">
+                  {user.username}
+                </span>
+              </Link>
             ) : (
               <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700">
                 <Link href="/auth">Sign In</Link>

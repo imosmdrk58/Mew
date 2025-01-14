@@ -16,6 +16,9 @@ DROP FUNCTION IF EXISTS insert_page(INTEGER, INTEGER,VARCHAR(255));
 DROP TABLE IF EXISTS comments CASCADE;
 
 -- Ratings tablosunu sil
+DROP TABLE IF EXISTS manga_ratings CASCADE;
+
+-- Ratings tablosunu sil
 DROP TABLE IF EXISTS ratings CASCADE;
 
 -- User_Favorites tablosunu sil

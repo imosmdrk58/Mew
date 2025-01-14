@@ -34,11 +34,13 @@ const fetchMangaDetail = async (mangaId: string): Promise<Manga> => {
 
     // JSON verisini al
     const data = await response.json();
-    const dataChapters = await responseChapters.json();
+    let dataChapters = await responseChapters.json();
 
     console.log("API Response:", data); // API yanıtını logla
     console.log("Chapter API Response:", dataChapters); // API yanıtını logla
-
+    if (!dataChapters) {
+      dataChapters = [];
+    }
     // API'den gelen veriyi Manga tipine dönüştür
     const manga: Manga = {
       manga_id: data.id ?? data.manga_id,
