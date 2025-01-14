@@ -83,13 +83,13 @@ func (r *UserRepository) AddMangaToFavorites(favourite *Favourite) error {
 	return nil
 }
 
-func (r *UserRepository) RemoveMangaFromFavorites(userID, mangaID int) error {
+func (r *UserRepository) RemoveMangaFromFavorites(favourite *Favourite) error {
 	query := `
         DELETE FROM user_favorites 
         WHERE user_id = $1 AND manga_id = $2
     `
 
-	result, err := r.db.Exec(query, userID, mangaID)
+	result, err := r.db.Exec(query, favourite.UserID, favourite.MangaID)
 	if err != nil {
 		return fmt.Errorf("failed to remove manga from favorites: %v", err)
 	}
