@@ -19,3 +19,19 @@ func (s *UserService) LoginUser(username, password string) (*User, error) {
 func (s *UserService) GetUserByUsername(username string) (*User, error) {
 	return s.repo.GetUserByUsername(username)
 }
+
+func (s *UserService) AddMangaToFavorites(userID, mangaID int) error {
+	return s.repo.AddMangaToFavorites(userID, mangaID)
+}
+
+func (s *UserService) RemoveMangaFromFavorites(userID, mangaID int) error {
+	return s.repo.RemoveMangaFromFavorites(userID, mangaID)
+}
+
+func (s *UserService) IsMangaFavorited(userID, mangaID int) (bool, error) {
+	return s.repo.IsMangaFavorited(userID, mangaID)
+}
+
+func (s *UserService) GetUserFavorites(userID int) ([]int, error) {
+	return s.repo.GetUserFavorites(userID)
+}

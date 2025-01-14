@@ -44,6 +44,20 @@ const MangaListPage = () => {
     }
   };
 
+  const deleteManga = async (mangaId: number) => {
+    // api : 	router.HandleFunc("/manga/{id}", h.DeleteManga).Methods("DELETE")
+    try {
+      await fetch(`http://localhost:8080/manga/${mangaId}`, {
+        method: "DELETE",
+      });
+      setMangas((prevMangas) =>
+        prevMangas.filter((manga) => manga.manga_id !== mangaId)
+      );
+    } catch (error) {
+      console.error("Error deleting manga:", error);
+    }
+  };
+
   return (
     <div className="p-6 mt-16">
       <div className="flex justify-between items-center mb-6">
@@ -86,7 +100,11 @@ const MangaListPage = () => {
                     <Edit className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Button variant="destructive" size="icon">
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => deleteManga(manga.manga_id)}
+                >
                   <Trash className="h-4 w-4" />
                 </Button>
               </TableCell>

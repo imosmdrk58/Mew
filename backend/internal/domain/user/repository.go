@@ -65,3 +65,100 @@ func (r *UserRepository) LoginUser(username, password string) (*User, error) {
 
 	return user, nil
 }
+
+func (r *UserRepository) AddMangaToFavorites(userID, mangaID int) error {
+	query := `
+		INSERT INTO user_favorites (user_id, manga_id)
+		VALUES ($1, $2)
+		ON CONFLICT (user_id, manga_id) DO NOTHING
+	`
+
+	result, err := r.db.Exec(query, userID, mangaID)
+	if err != nil {
+		fmt.Printf("Error adding manga to favorites: %v\n", err)
+		return fmt.Errorf("failed to add manga to favorites: %v", err)
+	}
+
+	// Check if a row was actually inserted
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		fmt.Printf("Error checking rows affected: %v\n", err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		fmt.Printf("Manga is already in favorites for user_id: %d, manga_id: %d\n", userID, mangaID)
+		return fmt.Errorf("manga is already in favorites")
+	}
+
+	fmt.Printf("Added manga to favorites for user_id: %d, manga_id: %d\n", userID, mangaID)
+	return nil
+}
+
+func (r *UserRepository) RemoveMangaFromFavorites(userID, mangaID int) error {
+	query := `
+        DELETE FROM user_favorites 
+        WHERE user_id = $1 AND manga_id = $2
+    `
+
+	result, err := r.db.Exec(query, userID, mangaID)
+	if err != nil {
+		return fmt.Errorf("failed to remove manga from favorites: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("manga was not in favorites")
+	}
+
+	return nil
+}
+
+func (r *UserRepository) IsMangaFavorited(userID, mangaID int) (bool, error) {
+	var exists bool
+	query := `
+		SELECT EXISTS(
+			SELECT 1 FROM user_favorites 
+			WHERE user_id = $1 AND manga_id = $2
+		)
+	`
+
+	err := r.db.QueryRow(query, userID, mangaID).Scan(&exists)
+	if err != nil {
+		fmt.Printf("Error checking if manga is favorited: %v\n", err)
+		return false, fmt.Errorf("failed to check favorite status: %v", err)
+	}
+
+	fmt.Printf("Checked favorite status for user_id: %d, manga_id: %d, exists: %t\n", userID, mangaID, exists)
+	return exists, nil
+}
+
+func (r *UserRepository) GetUserFavorites(userID int) ([]int, error) {
+	query := `
+        SELECT manga_id 
+        FROM user_favorites 
+        WHERE user_id = $1 
+        ORDER BY favorited_at DESC
+    `
+
+	rows, err := r.db.Query(query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user favorites: %v", err)
+	}
+	defer rows.Close()
+
+	var mangaIDs []int
+	for rows.Next() {
+		var mangaID int
+		if err := rows.Scan(&mangaID); err != nil {
+			return nil, err
+		}
+		mangaIDs = append(mangaIDs, mangaID)
+	}
+
+	return mangaIDs, nil
+}
