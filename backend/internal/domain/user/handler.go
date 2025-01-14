@@ -28,6 +28,9 @@ func (h *UserHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/users/{user_id}/favorites/check/{manga_id}", h.IsMangaFavorited).Methods("GET")
 	router.HandleFunc("/users/{user_id}/favorites", h.GetUserFavorites).Methods("GET")
 
+	router.HandleFunc("/api/users", h.GetAllUsers).Methods("GET")
+	router.HandleFunc("/users/{username}", h.DeleteUser).Methods("DELETE")
+	router.HandleFunc("/users/{username}/role", h.ChangeUserRole).Methods("PATCH")
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -162,4 +165,50 @@ func (h *UserHandler) RemoveMangaFromFavorites(w http.ResponseWriter, r *http.Re
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := h.service.GetAllUsers()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(users)
+}
+
+func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	username := vars["username"]
+
+	if err := h.service.DeleteUser(username); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *UserHandler) ChangeUserRole(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	username := vars["username"]
+
+	var payload struct {
+		IsAdmin bool `json:"is_admin"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.ChangeUserRole(username, payload.IsAdmin); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]bool{"is_admin": payload.IsAdmin})
 }

@@ -35,3 +35,17 @@ func (s *UserService) IsMangaFavorited(userID, mangaID int) (bool, error) {
 func (s *UserService) GetUserFavorites(userID int) ([]int, error) {
 	return s.repo.GetUserFavorites(userID)
 }
+
+func (s *UserService) DeleteUser(username string) error {
+	return s.repo.DeleteUser(username)
+}
+
+func (s *UserService) ChangeUserRole(username string, isAdmin bool) error {
+	return s.repo.ChangeUserRole(username, isAdmin)
+}
+
+func (s *UserService) GetAllUsers() ([]User, error) {
+	return s.repo.GetAllUsers()
+}
+
+

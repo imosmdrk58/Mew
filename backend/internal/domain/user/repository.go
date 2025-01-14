@@ -150,3 +150,42 @@ func (r *UserRepository) GetUserFavorites(userID int) ([]int, error) {
 
 	return mangaIDs, nil
 }
+
+func (r *UserRepository) DeleteUser(username string) error {
+	query := "DELETE FROM users WHERE username = $1"
+	_, err := r.db.Exec(query, username)
+	return err
+}
+
+func (r *UserRepository) ChangeUserRole(username string, isAdmin bool) error {
+	query := "UPDATE users SET is_admin = $1 WHERE username = $2"
+	_, err := r.db.Exec(query, isAdmin, username)
+	return err
+}
+
+func (r *UserRepository) GetAllUsers() ([]User, error) {
+	var users []User
+	query := "SELECT user_id, username, email, password_hash, is_admin, created_at  FROM users"
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(
+			&user.UserID,
+			&user.Username,
+			&user.Email,
+			&user.PasswordHash,
+			&user.IsAdmin,
+			&user.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
