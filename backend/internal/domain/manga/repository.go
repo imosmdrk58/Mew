@@ -14,6 +14,7 @@ type MangaRepository interface {
 	UpdateManga(manga *Manga) error
 	DeleteManga(id int) error
 	SearchManga(search string) ([]Manga, error)
+	GetUserFavoriteMangas(id int) ([]Manga, error)
 }
 
 type mangaRepository struct {
@@ -191,6 +192,41 @@ func (r *mangaRepository) SearchManga(search string) ([]Manga, error) {
 		}
 		// Debug için her bir manga kaydını yazdır
 		log.Printf("Found manga: %+v", manga)
+		mangaList = append(mangaList, manga)
+	}
+
+	log.Printf("Total manga found: %d", len(mangaList))
+	return mangaList, nil
+}
+
+func (r *mangaRepository) GetUserFavoriteMangas(id int) ([]Manga, error) {
+	query := `
+		 SELECT m.manga_id, m.title, m.description, m.status, m.cover_image, m.published_date, m.rating FROM vw_user_favorite_manga_details m WHERE m.user_id = $1;
+	`
+
+	rows, err := r.db.Query(query, id)
+	if err != nil {
+		log.Printf("Database query error: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var mangaList []Manga
+	for rows.Next() {
+		var manga Manga
+		err := rows.Scan(
+			&manga.ID,
+			&manga.Title,
+			&manga.Description,
+			&manga.Status,
+			&manga.CoverImage,
+			&manga.PublishedDate,
+			&manga.Rating,
+		)
+		if err != nil {
+			log.Printf("Row scan error: %v", err)
+			return nil, err
+		}
 		mangaList = append(mangaList, manga)
 	}
 

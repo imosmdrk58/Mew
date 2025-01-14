@@ -8,6 +8,7 @@ import { useAuthStore } from "@/store/userStore";
 
 const NavigationBar = () => {
   const user = useAuthStore((state) => state.user);
+
   const [searchTerm, setSearchTerm] = useState("");
   interface Manga {
     manga_id: string;
@@ -50,6 +51,7 @@ const NavigationBar = () => {
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
+  
   return (
     <nav className="border-b border-purple-900 bg-gray-900/75 backdrop-blur-lg fixed w-full top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -71,13 +73,15 @@ const NavigationBar = () => {
                   <span>Manga List</span>
                 </Button>
               </Link>
-              <Button
-                variant="ghost"
-                className="flex items-center space-x-2 text-gray-300 hover:text-pink-400 hover:bg-gray-800"
-              >
-                <Heart className="h-4 w-4" />
-                <span>Favorites</span>
-              </Button>
+              {user && (
+                <Button
+                  variant="ghost"
+                  className="flex items-center space-x-2 text-gray-300 hover:text-pink-400 hover:bg-gray-800"
+                >
+                  <Heart className="h-4 w-4" />
+                  <span>Favorites</span>
+                </Button>
+              )}
             </div>
           </div>
 

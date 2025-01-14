@@ -64,7 +64,11 @@ const AuthPage = () => {
       }
 
       const data = await response.json();
+
+
       router.push("/mangalist");
+      router.refresh();
+
     } catch (err: any) {
       console.error(err);
       setError(err.message);

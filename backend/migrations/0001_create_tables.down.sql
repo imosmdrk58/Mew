@@ -1,5 +1,7 @@
 DROP VIEW IF EXISTS vw_manga_details;
 
+DROP VIEW IF EXISTS vw_user_favorite_manga_details;
+
 -- get manga details fonksiyonunu sil
 DROP FUNCTION IF EXISTS get_manga_details(INTEGER);
 

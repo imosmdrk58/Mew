@@ -240,6 +240,33 @@ LEFT JOIN
     authors a ON ma.author_id = a.author_id;
 
 
+DROP VIEW IF EXISTS vw_user_favorite_manga_details;
+CREATE OR REPLACE VIEW vw_user_favorite_manga_details AS
+SELECT 
+    uf.user_id, -- Kullanıcı ID'sini ekliyoruz
+    m.manga_id, 
+    m.title, 
+    m.description, 
+    m.status, 
+    m.cover_image, 
+    m.published_date, 
+    m.rating,
+    COALESCE(a.author_id, 0) as author_id,
+    COALESCE(a.name, '') as author_name,
+    COALESCE(a.bio, '') as author_bio,
+    uf.favorited_at
+FROM 
+    manga m
+LEFT JOIN 
+    manga_authors ma ON m.manga_id = ma.manga_id
+LEFT JOIN 
+    authors a ON ma.author_id = a.author_id
+JOIN 
+    user_favorites uf ON m.manga_id = uf.manga_id
+ORDER BY 
+    uf.favorited_at DESC;
+
+
 
 -- Trigger function
 CREATE OR REPLACE FUNCTION update_manga_last_updated_on_chapter()

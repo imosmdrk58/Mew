@@ -24,6 +24,8 @@ func (h *MangaHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/manga/{id}", h.UpdateManga).Methods("PUT")
 	router.HandleFunc("/manga/{id}", h.DeleteManga).Methods("DELETE")
 	router.HandleFunc("/manga/create-manga", h.CreateManga).Methods("POST")
+
+	router.HandleFunc("/favorites/user/{user_id}", h.GetUserFavoriteMangas).Methods("GET")
 }
 
 func (h *MangaHandler) GetMangaList(w http.ResponseWriter, r *http.Request) {
@@ -128,6 +130,23 @@ func (h *MangaHandler) SearchManga(w http.ResponseWriter, r *http.Request) {
 	mangaList, err := h.service.SearchManga(search)
 	if err != nil {
 		http.Error(w, "Failed to search manga", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(mangaList)
+}
+func (h *MangaHandler) GetUserFavoriteMangas(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["user_id"])
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	mangaList, err := h.service.GetUserFavoriteMangas(id)
+	if err != nil {
+		http.Error(w, "Failed to fetch favorite manga list", http.StatusInternalServerError)
 		return
 	}
 

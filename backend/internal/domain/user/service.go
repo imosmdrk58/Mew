@@ -32,10 +32,6 @@ func (s *UserService) IsMangaFavorited(userID, mangaID int) (bool, error) {
 	return s.repo.IsMangaFavorited(userID, mangaID)
 }
 
-func (s *UserService) GetUserFavorites(userID int) ([]int, error) {
-	return s.repo.GetUserFavorites(userID)
-}
-
 func (s *UserService) DeleteUser(username string) error {
 	return s.repo.DeleteUser(username)
 }

@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart, HeartOff } from "lucide-react";
+import { useAuthStore } from "@/store/userStore";
 
 interface FavoriteButtonProps {
   mangaId: string;
@@ -13,7 +14,9 @@ interface FavoriteButtonProps {
 export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuthStore();
 
+  
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       try {

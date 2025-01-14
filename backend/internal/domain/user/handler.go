@@ -30,8 +30,6 @@ func (h *UserHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/favorites/add", h.AddMangaToFavorites).Methods("POST")
 	router.HandleFunc("/favorites/remove", h.RemoveMangaFromFavorites).Methods("DELETE")
 	router.HandleFunc("/favorites/user/{user_id}/manga/{manga_id}", h.IsMangaFavorited).Methods("GET")
-	router.HandleFunc("/favorites/user/{user_id}", h.GetUserFavorites).Methods("GET")
-
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -87,24 +85,6 @@ func (h *UserHandler) GetUserByUsername(w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
-}
-
-func (h *UserHandler) GetUserFavorites(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	userID, err := strconv.Atoi(vars["user_id"])
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	favorites, err := h.service.GetUserFavorites(userID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(favorites)
 }
 
 func (h *UserHandler) IsMangaFavorited(w http.ResponseWriter, r *http.Request) {

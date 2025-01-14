@@ -125,32 +125,6 @@ func (r *UserRepository) IsMangaFavorited(userID, mangaID int) (bool, error) {
 	return exists, nil
 }
 
-func (r *UserRepository) GetUserFavorites(userID int) ([]int, error) {
-	query := `
-        SELECT manga_id 
-        FROM user_favorites 
-        WHERE user_id = $1 
-        ORDER BY favorited_at DESC
-    `
-
-	rows, err := r.db.Query(query, userID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user favorites: %v", err)
-	}
-	defer rows.Close()
-
-	var mangaIDs []int
-	for rows.Next() {
-		var mangaID int
-		if err := rows.Scan(&mangaID); err != nil {
-			return nil, err
-		}
-		mangaIDs = append(mangaIDs, mangaID)
-	}
-
-	return mangaIDs, nil
-}
-
 func (r *UserRepository) DeleteUser(username string) error {
 	query := "DELETE FROM users WHERE username = $1"
 	_, err := r.db.Exec(query, username)
