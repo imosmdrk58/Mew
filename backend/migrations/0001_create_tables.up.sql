@@ -259,3 +259,33 @@ CREATE TRIGGER tr_chapter_update_manga
     ON chapters
     FOR EACH ROW
     EXECUTE FUNCTION update_manga_last_updated_on_chapter();
+
+
+-- STORED PROCEDURES
+CREATE OR REPLACE PROCEDURE DeleteUserByUsername(IN input_username VARCHAR)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM users WHERE username = input_username;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE UpdateUserAdminStatus(is_admin BOOLEAN, username VARCHAR)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE users
+    SET is_admin = is_admin
+    WHERE username = username;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE AddToUserFavorites(user_id_param INT, manga_id_param INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO user_favorites (user_id, manga_id)
+    VALUES (user_id_param, manga_id_param)
+    ON CONFLICT (user_id, manga_id) DO NOTHING;
+END;
+$$;

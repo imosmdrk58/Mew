@@ -67,11 +67,7 @@ func (r *UserRepository) LoginUser(username, password string) (*User, error) {
 }
 
 func (r *UserRepository) AddMangaToFavorites(favourite *Favourite) error {
-	query := `
-		INSERT INTO user_favorites (user_id, manga_id)
-		VALUES ($1, $2)
-		ON CONFLICT (user_id, manga_id) DO NOTHING
-	`
+	query := "CALL AddToUserFavorites($1, $2)"
 
 	_, err := r.db.Exec(query, favourite.UserID, favourite.MangaID)
 	if err != nil {
@@ -152,13 +148,13 @@ func (r *UserRepository) GetUserFavorites(userID int) ([]int, error) {
 }
 
 func (r *UserRepository) DeleteUser(username string) error {
-	query := "DELETE FROM users WHERE username = $1"
+	query := "CALL DeleteUserByUsername($1)"
 	_, err := r.db.Exec(query, username)
 	return err
 }
 
 func (r *UserRepository) ChangeUserRole(username string, isAdmin bool) error {
-	query := "UPDATE users SET is_admin = $1 WHERE username = $2"
+	query := "CALL UpdateUserAdminStatus($1, $2)"
 	_, err := r.db.Exec(query, isAdmin, username)
 	return err
 }
