@@ -199,7 +199,7 @@ func (h *UserHandler) ChangeUserRole(w http.ResponseWriter, r *http.Request) {
 	username := vars["username"]
 
 	var payload struct {
-		IsAdmin bool `json:true`
+		IsAdmin bool `json:"is_admin"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {

@@ -13,6 +13,7 @@ type MangaRepository interface {
 	CreateManga(manga *Manga) error
 	UpdateManga(manga *Manga) error
 	DeleteManga(id int) error
+	SearchManga(search string) ([]Manga, error)
 }
 
 type mangaRepository struct {
@@ -139,4 +140,60 @@ func (r *mangaRepository) DeleteManga(id int) error {
 	}
 	log.Printf("Manga deleted successfully")
 	return nil
+}
+
+// search manga
+func (r *mangaRepository) SearchManga(search string) ([]Manga, error) {
+
+	log.Printf("Searching manga with query: %s", search)
+
+	query := `SELECT 
+		m.manga_id, 
+		m.title, 
+		m.cover_image, 
+		m.description, 
+		m.status, 
+		m.published_date, 
+		m.rating, 
+		COALESCE(a.author_id, 0) as author_id,
+		COALESCE(a.name, '') as author_name,
+		COALESCE(a.bio, '') as author_bio
+	FROM manga m
+	LEFT JOIN manga_authors ma ON m.manga_id = ma.manga_id
+	LEFT JOIN authors a ON ma.author_id = a.author_id
+	WHERE m.title ILIKE '%' || $1 || '%'`
+
+	rows, err := r.db.Query(query, search)
+	if err != nil {
+		log.Printf("Database query error: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var mangaList []Manga
+	for rows.Next() {
+		var manga Manga
+		err := rows.Scan(
+			&manga.ID,
+			&manga.Title,
+			&manga.CoverImage,
+			&manga.Description,
+			&manga.Status,
+			&manga.PublishedDate,
+			&manga.Rating,
+			&manga.AuthorId,
+			&manga.AuthorName,
+			&manga.AuthorBio,
+		)
+		if err != nil {
+			log.Printf("Row scan error: %v", err)
+			return nil, err
+		}
+		// Debug için her bir manga kaydını yazdır
+		log.Printf("Found manga: %+v", manga)
+		mangaList = append(mangaList, manga)
+	}
+
+	log.Printf("Total manga found: %d", len(mangaList))
+	return mangaList, nil
 }

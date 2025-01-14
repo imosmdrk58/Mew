@@ -47,3 +47,5 @@ func (s *UserService) ChangeUserRole(username string, isAdmin bool) error {
 func (s *UserService) GetAllUsers() ([]User, error) {
 	return s.repo.GetAllUsers()
 }
+
+

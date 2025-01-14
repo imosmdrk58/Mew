@@ -1,5 +1,5 @@
-'use client';
-import React, { useEffect, useState } from 'react';
+"use client";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -25,12 +25,14 @@ const UserManagement = () => {
     email: string;
     is_admin: boolean;
   }
-  
+
   const [users, setUsers] = useState<User[]>([]);
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users`
+      );
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Kullanıcıları yüklerken hata oluştu: ${errorText}`);
@@ -44,44 +46,52 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (username: string) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${username}`, {
-            method: 'DELETE',
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Kullanıcı silinirken hata oluştu: ${errorText}`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${username}`,
+        {
+          method: "DELETE",
         }
-        
-        setUsers(users.filter(user => user.username !== username));
-    } catch (error) {
-        console.error("Delete Error:", error);
-    }
-};
+      );
 
-const handleRoleChange = async (username: string, newIsAdmin: boolean) => {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Kullanıcı silinirken hata oluştu: ${errorText}`);
+      }
+
+      setUsers(users.filter((user) => user.username !== username));
+    } catch (error) {
+      console.error("Delete Error:", error);
+    }
+  };
+
+  const handleRoleChange = async (username: string, newIsAdmin: boolean) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${username}/role`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ is_admin: newIsAdmin }),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Rol değiştirilirken hata oluştu: ${errorText}`);
+      console.log(newIsAdmin);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${username}/role`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ is_admin: newIsAdmin }),
         }
+      );
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Rol değiştirilirken hata oluştu: ${errorText}`);
+      }
 
-        setUsers(users.map(user =>
-            user.username === username ? { ...user, is_admin: newIsAdmin } : user
-        ));
+      setUsers(
+        users.map((user) =>
+          user.username === username ? { ...user, is_admin: newIsAdmin } : user
+        )
+      );
     } catch (error) {
-        console.error("Role Change Error:", error);
+      console.error("Role Change Error:", error);
     }
-};
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -100,27 +110,46 @@ const handleRoleChange = async (username: string, newIsAdmin: boolean) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead style={{ color: 'white', fontWeight: '600' }}>Kullanıcı Adı</TableHead>
-                  <TableHead style={{ color: 'white', fontWeight: '600' }}>E-posta</TableHead>
-                  <TableHead style={{ color: 'white', fontWeight: '600' }}>Rol</TableHead>
-                  <TableHead style={{ color: 'white', fontWeight: '600' }}>İşlemler</TableHead>
+                  <TableHead style={{ color: "white", fontWeight: "600" }}>
+                    Kullanıcı Adı
+                  </TableHead>
+                  <TableHead style={{ color: "white", fontWeight: "600" }}>
+                    E-posta
+                  </TableHead>
+                  <TableHead style={{ color: "white", fontWeight: "600" }}>
+                    Rol
+                  </TableHead>
+                  <TableHead style={{ color: "white", fontWeight: "600" }}>
+                    İşlemler
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.map((user) => (
-                  <TableRow key={user.username} className="hover:bg-gray-800 transition duration-200">
-                    <TableCell style={{ color: 'white' }}>{user.username}</TableCell>
-                    <TableCell style={{ color: 'white' }}>{user.email}</TableCell>
+                  <TableRow
+                    key={user.username}
+                    className="hover:bg-gray-800 transition duration-200"
+                  >
+                    <TableCell style={{ color: "white" }}>
+                      {user.username}
+                    </TableCell>
+                    <TableCell style={{ color: "white" }}>
+                      {user.email}
+                    </TableCell>
                     <TableCell>
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-semibold flex items-center w-fit gap-1 ${
                           user.is_admin
-                            ? 'bg-gradient-to-r from-purple-500 to-purple-700 text-white'
-                            : 'bg-gradient-to-r from-gray-500 to-gray-700 text-white'
+                            ? "bg-gradient-to-r from-purple-500 to-purple-700 text-white"
+                            : "bg-gradient-to-r from-gray-500 to-gray-700 text-white"
                         }`}
                       >
-                        {user.is_admin ? <Shield className="w-4 h-4" /> : <User className="w-4 h-4" />}
-                        {user.is_admin ? 'Admin' : 'User'}
+                        {user.is_admin ? (
+                          <Shield className="w-4 h-4" />
+                        ) : (
+                          <User className="w-4 h-4" />
+                        )}
+                        {user.is_admin ? "Admin" : "User"}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -132,7 +161,9 @@ const handleRoleChange = async (username: string, newIsAdmin: boolean) => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-48 bg-gray-800 border-gray-700">
                           <DropdownMenuItem
-                            onClick={() => handleRoleChange(user.username, !user.is_admin)}
+                            onClick={() =>
+                              handleRoleChange(user.username, !user.is_admin)
+                            }
                             className="flex items-center gap-2 text-white hover:bg-gray-700 cursor-pointer"
                           >
                             <UserCog className="h-4 w-4" />

@@ -6,6 +6,7 @@ type MangaService interface {
 	CreateManga(manga *Manga) error
 	UpdateManga(manga *Manga) error
 	DeleteManga(id int) error
+	SearchManga(query string) ([]Manga, error)
 }
 
 type mangaService struct {
@@ -34,4 +35,9 @@ func (s *mangaService) UpdateManga(manga *Manga) error {
 
 func (s *mangaService) DeleteManga(id int) error {
 	return s.repo.DeleteManga(id)
+}
+
+// search manga
+func (s *mangaService) SearchManga(query string) ([]Manga, error) {
+	return s.repo.SearchManga(query)
 }

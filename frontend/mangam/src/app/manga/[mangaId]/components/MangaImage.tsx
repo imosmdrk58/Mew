@@ -7,10 +7,10 @@ export const MangaImage = ({
   coverImage: string;
   title: string;
 }) => (
-  <Card>
-    <CardContent className="p-4">
+  <Card className="p-0">
+    <CardContent className="p-0">
       <div className="relative aspect-[2/3] w-full">
-        <img src={coverImage} alt={title} className="object-cover rounded-lg" />
+        <img src={coverImage} alt={title} className="object-cover w-full h-full rounded-lg" />
       </div>
     </CardContent>
   </Card>

@@ -2,6 +2,7 @@ package manga
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -17,12 +18,12 @@ func NewMangaHandler(service MangaService) *MangaHandler {
 }
 
 func (h *MangaHandler) RegisterRoutes(router *mux.Router) {
+	router.HandleFunc("/manga/search", h.SearchManga).Methods("GET")
 	router.HandleFunc("/manga", h.GetMangaList).Methods("GET")
 	router.HandleFunc("/manga/{id}", h.GetMangaByID).Methods("GET")
 	router.HandleFunc("/manga/{id}", h.UpdateManga).Methods("PUT")
 	router.HandleFunc("/manga/{id}", h.DeleteManga).Methods("DELETE")
 	router.HandleFunc("/manga/create-manga", h.CreateManga).Methods("POST")
-
 }
 
 func (h *MangaHandler) GetMangaList(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +48,7 @@ func (h *MangaHandler) GetMangaList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *MangaHandler) GetMangaByID(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Şuan buradayım djkasndjk sanjkdsnajk ndjksan djksa")
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -115,6 +117,22 @@ func (h *MangaHandler) DeleteManga(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *MangaHandler) SearchManga(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	search := query.Get("search")
+
+	log.Printf("Searching manga with jhere query: %s", search)
+
+	mangaList, err := h.service.SearchManga(search)
+	if err != nil {
+		http.Error(w, "Failed to search manga", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(mangaList)
 }
 
 func parseIntParam(param string, defaultValue int) int {

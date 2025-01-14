@@ -238,3 +238,24 @@ LEFT JOIN
     manga_authors ma ON m.manga_id = ma.manga_id
 LEFT JOIN 
     authors a ON ma.author_id = a.author_id;
+
+
+
+-- Trigger function
+CREATE OR REPLACE FUNCTION update_manga_last_updated_on_chapter()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE manga
+    SET last_updated = CURRENT_TIMESTAMP
+    WHERE manga_id = NEW.manga_id;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger
+CREATE TRIGGER tr_chapter_update_manga
+    AFTER INSERT
+    ON chapters
+    FOR EACH ROW
+    EXECUTE FUNCTION update_manga_last_updated_on_chapter();
