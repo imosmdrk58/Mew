@@ -111,6 +111,6 @@ func (r *authorRepository) UpdateAuthor(author *Author) error {
 }
 
 func (r *authorRepository) DeleteAuthor(authorID int) error {
-	_, err := r.db.Exec("SELECT delete_author_and_related_data($1)", authorID)
+	_, err := r.db.Exec("DELETE FROM authors WHERE author_id = $1;", authorID)
 	return err
 }
