@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Heart, Search } from "lucide-react";
+import { BookOpen, Heart, Search, Users } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "@/store/userStore";
 
@@ -51,7 +51,6 @@ const NavigationBar = () => {
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
-  
   return (
     <nav className="border-b border-purple-900 bg-gray-900/75 backdrop-blur-lg fixed w-full top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -74,15 +73,29 @@ const NavigationBar = () => {
                 </Button>
               </Link>
               {user && (
-                <Link href="/mangalist/favorites">
-                <Button
-                  variant="ghost"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-pink-400 hover:bg-gray-800"
-                >
-                  <Heart className="h-4 w-4" />
-                  <span>Favorites</span>
-                </Button>
-                </Link>
+                <>
+                  {user.is_admin ? (
+                    <Link href="/admin/users">
+                      <Button
+                        variant="ghost"
+                        className="flex items-center space-x-2 text-gray-300 hover:text-pink-400 hover:bg-gray-800"
+                      >
+                        <Users className="h-4 w-4" />
+                        <span>Users</span>
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href="/mangalist/favorites">
+                      <Button
+                        variant="ghost"
+                        className="flex items-center space-x-2 text-gray-300 hover:text-pink-400 hover:bg-gray-800"
+                      >
+                        <Heart className="h-4 w-4" />
+                        <span>Favorites</span>
+                      </Button>
+                    </Link>
+                  )}
+                </>
               )}
             </div>
           </div>

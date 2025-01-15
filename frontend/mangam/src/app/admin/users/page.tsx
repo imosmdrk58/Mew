@@ -98,11 +98,11 @@ const UserManagement = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-gray-50">
       <main className="pt-12 pb-8 px-6 max-w-7xl mx-auto">
-        <Card className="bg-gray-800/50 backdrop-blur border-gray-700 hover:bg-gray-800/70 transition-colors shadow-lg">
+        <Card className="bg-white/90 backdrop-blur border-gray-200 hover:bg-white transition-colors shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-white">
+            <CardTitle className="text-2xl font-bold text-gray-900">
               Kullanıcı Yönetimi
             </CardTitle>
           </CardHeader>
@@ -110,16 +110,16 @@ const UserManagement = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead style={{ color: "white", fontWeight: "600" }}>
+                  <TableHead style={{ color: "#374151", fontWeight: "600" }}>
                     Kullanıcı Adı
                   </TableHead>
-                  <TableHead style={{ color: "white", fontWeight: "600" }}>
+                  <TableHead style={{ color: "#374151", fontWeight: "600" }}>
                     E-posta
                   </TableHead>
-                  <TableHead style={{ color: "white", fontWeight: "600" }}>
+                  <TableHead style={{ color: "#374151", fontWeight: "600" }}>
                     Rol
                   </TableHead>
-                  <TableHead style={{ color: "white", fontWeight: "600" }}>
+                  <TableHead style={{ color: "#374151", fontWeight: "600" }}>
                     İşlemler
                   </TableHead>
                 </TableRow>
@@ -128,20 +128,20 @@ const UserManagement = () => {
                 {users.map((user) => (
                   <TableRow
                     key={user.username}
-                    className="hover:bg-gray-800 transition duration-200"
+                    className="hover:bg-gray-50 transition duration-200"
                   >
-                    <TableCell style={{ color: "white" }}>
+                    <TableCell style={{ color: "#374151" }}>
                       {user.username}
                     </TableCell>
-                    <TableCell style={{ color: "white" }}>
+                    <TableCell style={{ color: "#374151" }}>
                       {user.email}
                     </TableCell>
                     <TableCell>
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-semibold flex items-center w-fit gap-1 ${
                           user.is_admin
-                            ? "bg-gradient-to-r from-purple-500 to-purple-700 text-white"
-                            : "bg-gradient-to-r from-gray-500 to-gray-700 text-white"
+                            ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white"
+                            : "bg-gradient-to-r from-gray-500 to-gray-600 text-white"
                         }`}
                       >
                         {user.is_admin ? (
@@ -156,23 +156,23 @@ const UserManagement = () => {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4 text-white" />
+                            <MoreVertical className="h-4 w-4 text-gray-700" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-48 bg-gray-800 border-gray-700">
+                        <DropdownMenuContent className="w-48 bg-white border-gray-200">
                           <DropdownMenuItem
                             onClick={() =>
                               handleRoleChange(user.username, !user.is_admin)
                             }
-                            className="flex items-center gap-2 text-white hover:bg-gray-700 cursor-pointer"
+                            className="flex items-center gap-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
                           >
                             <UserCog className="h-4 w-4" />
                             {user.is_admin ? "User Yap" : "Admin Yap"}
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-gray-700" />
+                          <DropdownMenuSeparator className="bg-gray-200" />
                           <DropdownMenuItem
                             onClick={() => handleDeleteUser(user.username)}
-                            className="flex items-center gap-2 text-red-400 hover:text-red-300 hover:bg-gray-700 cursor-pointer"
+                            className="flex items-center gap-2 text-red-600 hover:text-red-500 hover:bg-gray-100 cursor-pointer"
                           >
                             <Trash2 className="h-4 w-4" />
                             Kullanıcıyı Sil

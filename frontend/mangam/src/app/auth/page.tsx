@@ -65,10 +65,8 @@ const AuthPage = () => {
 
       const data = await response.json();
 
-
       router.push("/mangalist");
       router.refresh();
-
     } catch (err: any) {
       console.error(err);
       setError(err.message);
@@ -165,34 +163,6 @@ const AuthPage = () => {
                       required
                     />
                   </div>
-                </div>
-              )}
-
-              {isLogin ? (
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-700 bg-gray-800 text-purple-500 focus:ring-purple-500"
-                    />
-                    <span className="text-sm text-gray-300">Remember me</span>
-                  </label>
-                  <a
-                    href="#"
-                    className="text-sm text-purple-400 hover:text-purple-300"
-                  >
-                    Forgot password?
-                  </a>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-700 bg-gray-800 text-purple-500 focus:ring-purple-500"
-                  />
-                  <span className="text-sm text-gray-300">
-                    I agree to the Terms of Service and Privacy Policy
-                  </span>
                 </div>
               )}
 
