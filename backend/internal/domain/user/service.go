@@ -43,3 +43,7 @@ func (s *UserService) ChangeUserRole(username string, isAdmin bool) error {
 func (s *UserService) GetAllUsers() ([]User, error) {
 	return s.repo.GetAllUsers()
 }
+
+func (s *UserService) GetUserRatingForManga(userID, mangaID int) (int, error) {
+	return s.repo.GetUserRatingForManga(userID, mangaID)
+}

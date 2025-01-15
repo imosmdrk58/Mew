@@ -2,6 +2,7 @@ package manga
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -18,6 +19,7 @@ func NewMangaHandler(service MangaService) *MangaHandler {
 }
 
 func (h *MangaHandler) RegisterRoutes(router *mux.Router) {
+	router.HandleFunc("/manga/rate", h.RateManga).Methods("POST")
 	router.HandleFunc("/manga/search", h.SearchManga).Methods("GET")
 	router.HandleFunc("/manga", h.GetMangaList).Methods("GET")
 	router.HandleFunc("/manga/{id}", h.GetMangaByID).Methods("GET")
@@ -184,4 +186,59 @@ func validateSortOrder(sortOrder string) string {
 		return "ASC"
 	}
 	return "DESC" // varsayılan sıralama yönü
+}
+
+func (h *MangaHandler) RateManga(w http.ResponseWriter, r *http.Request) {
+	var rating struct {
+		UserID  interface{} `json:"user_id"`
+		MangaID interface{} `json:"manga_id"`
+		Rating  int         `json:"rating"`
+		Review  string      `json:"review"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&rating); err != nil {
+		log.Printf("Failed to decode rating: %v", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// user_id ve manga_id'nin tipini kontrol et ve int'e çevir
+	userID, err := convertToInt(rating.UserID)
+	if err != nil {
+		log.Printf("Invalid user_id: %v", err)
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	mangaID, err := convertToInt(rating.MangaID)
+	if err != nil {
+		log.Printf("Invalid manga_id: %v", err)
+		http.Error(w, "Invalid manga_id", http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("Rating received: %+v", rating)
+
+	if err := h.service.RateManga(userID, mangaID, rating.Rating, rating.Review); err != nil {
+		log.Printf("Failed to rate manga: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("Successfully rated manga: MangaID=%d, UserID=%d, Rating=%d", mangaID, userID, rating.Rating)
+	w.WriteHeader(http.StatusOK)
+}
+
+// convertToInt, interface{} tipindeki değeri int'e çevirir
+func convertToInt(value interface{}) (int, error) {
+	switch v := value.(type) {
+	case int:
+		return v, nil
+	case float64:
+		return int(v), nil
+	case string:
+		return strconv.Atoi(v)
+	default:
+		return 0, fmt.Errorf("unsupported type: %T", value)
+	}
 }

@@ -2,7 +2,7 @@
 CREATE TYPE manga_status AS ENUM ('ongoing', 'completed', 'hiatus');
 
 -- Users tablosu
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -12,20 +12,20 @@ CREATE TABLE users (
 );
 
 -- Authors tablosu
-CREATE TABLE authors (
+CREATE TABLE IF NOT EXISTS authors (
     author_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     bio TEXT DEFAULT ''
 );
 
 -- Genres tablosu
-CREATE TABLE genres (
+CREATE TABLE IF NOT EXISTS genres (
     genre_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- Manga tablosu
-CREATE TABLE manga (
+CREATE TABLE IF NOT EXISTS manga (
     manga_id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT DEFAULT '',
@@ -37,21 +37,21 @@ CREATE TABLE manga (
 );
 
 -- Manga_Authors ilişki tablosu (Many-to-Many)
-CREATE TABLE manga_authors (
+CREATE TABLE IF NOT EXISTS manga_authors (
     manga_id INTEGER NOT NULL REFERENCES manga(manga_id) ON DELETE CASCADE,
     author_id INTEGER NOT NULL REFERENCES authors(author_id) ON DELETE CASCADE,
     PRIMARY KEY (manga_id, author_id)
 );
 
 -- Manga_Genres ilişki tablosu (Many-to-Many)
-CREATE TABLE manga_genres (
+CREATE TABLE IF NOT EXISTS manga_genres (
     manga_id INTEGER NOT NULL REFERENCES manga(manga_id) ON DELETE CASCADE,
     genre_id INTEGER NOT NULL REFERENCES genres(genre_id) ON DELETE CASCADE,
     PRIMARY KEY (manga_id, genre_id)
 );
 
 -- Chapters tablosu
-CREATE TABLE chapters (
+CREATE TABLE IF NOT EXISTS chapters (
     chapter_id SERIAL PRIMARY KEY,
     manga_id INTEGER NOT NULL REFERENCES manga(manga_id) ON DELETE CASCADE,
     chapter_number INTEGER NOT NULL CHECK (chapter_number > 0),
@@ -61,7 +61,7 @@ CREATE TABLE chapters (
 );
 
 -- Pages tablosu
-CREATE TABLE pages (
+CREATE TABLE IF NOT EXISTS pages (
     page_id SERIAL PRIMARY KEY,
     chapter_id INTEGER NOT NULL REFERENCES chapters(chapter_id) ON DELETE CASCADE,
     page_number INTEGER NOT NULL CHECK (page_number > 0),
@@ -70,7 +70,7 @@ CREATE TABLE pages (
 );
 
 
-CREATE TABLE user_reading_progress (
+CREATE TABLE IF NOT EXISTS user_reading_progress (
     user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     manga_id INTEGER NOT NULL REFERENCES manga(manga_id) ON DELETE CASCADE,
     last_chapter_id INTEGER REFERENCES chapters(chapter_id) ON DELETE SET NULL,
@@ -80,7 +80,7 @@ CREATE TABLE user_reading_progress (
 );
 
 
-CREATE TABLE user_favorites (
+CREATE TABLE IF NOT EXISTS user_favorites (
     user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     manga_id INTEGER NOT NULL REFERENCES manga(manga_id) ON DELETE CASCADE,
     favorited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -88,7 +88,7 @@ CREATE TABLE user_favorites (
 );
 
 
-CREATE TABLE ratings (
+CREATE TABLE IF NOT EXISTS ratings (
     rating_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     manga_id INTEGER NOT NULL REFERENCES manga(manga_id) ON DELETE CASCADE,
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS manga_ratings (
 );
 
 
-CREATE TABLE comments (
+CREATE TABLE IF NOT EXISTS comments (
     comment_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     chapter_id INTEGER NOT NULL REFERENCES chapters(chapter_id) ON DELETE CASCADE,
@@ -418,7 +418,7 @@ $$;
 
 
 
-CREATE TABLE logs (
+CREATE TABLE IF NOT EXISTS logs (
     log_id SERIAL PRIMARY KEY,
     table_name VARCHAR(50) NOT NULL,
     operation_type VARCHAR(20) NOT NULL,
@@ -505,3 +505,29 @@ FOR EACH ROW EXECUTE FUNCTION log_changes();
 CREATE TRIGGER tr_ratings_log
 AFTER INSERT OR UPDATE OR DELETE ON ratings
 FOR EACH ROW EXECUTE FUNCTION log_changes();
+
+
+
+
+
+-- up.sql
+CREATE OR REPLACE FUNCTION update_manga_rating()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE manga
+    SET rating = (
+        SELECT COALESCE(AVG(r.rating), 0.0)
+        FROM ratings r
+        WHERE r.manga_id = NEW.manga_id
+    )
+    WHERE manga_id = NEW.manga_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger tanımlaması
+CREATE TRIGGER update_manga_rating_trigger
+AFTER INSERT OR UPDATE OR DELETE ON ratings
+FOR EACH ROW
+EXECUTE FUNCTION update_manga_rating();

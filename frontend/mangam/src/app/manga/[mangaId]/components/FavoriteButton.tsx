@@ -16,10 +16,10 @@ export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuthStore();
 
-  
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       try {
+        if (!userId) return;
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/favorites/user/${userId}/manga/${mangaId}`,
           {
@@ -66,10 +66,9 @@ export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
         if (!response.ok) {
           throw new Error("Failed to remove from favorites");
         }
-
       } else {
         // Favorilere ekle
-       
+
         console.log("sent ", JSON.stringify(sentData));
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/favorites/add`,
@@ -79,13 +78,13 @@ export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify(sentData),
-          });
-          const data = await response.json();
-          console.log(data);
+          }
+        );
+        const data = await response.json();
+        console.log(data);
         if (!response.ok) {
           throw new Error("Failed to add to favorites");
         }
-        
       }
       setIsFavorited(!isFavorited);
     } catch (error) {
@@ -104,7 +103,7 @@ export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
     >
       {isFavorited ? (
         <>
-        <HeartOff className="w-5 h-5" />
+          <HeartOff className="w-5 h-5" />
           Remove from Favorites
         </>
       ) : (

@@ -26,7 +26,7 @@ func (h *UserHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/api/users", h.GetAllUsers).Methods("GET")
 	router.HandleFunc("/users/{username}", h.DeleteUser).Methods("DELETE")
 	router.HandleFunc("/users/{username}/role", h.ChangeUserRole).Methods("PATCH")
-
+	router.HandleFunc("/users/{user_id}/manga/{manga_id}/rating", h.GetUserRatingForManga).Methods("GET")
 	router.HandleFunc("/favorites/add", h.AddMangaToFavorites).Methods("POST")
 	router.HandleFunc("/favorites/remove", h.RemoveMangaFromFavorites).Methods("DELETE")
 	router.HandleFunc("/favorites/user/{user_id}/manga/{manga_id}", h.IsMangaFavorited).Methods("GET")
@@ -190,4 +190,27 @@ func (h *UserHandler) ChangeUserRole(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]bool{"is_admin": payload.IsAdmin})
+}
+
+func (h *UserHandler) GetUserRatingForManga(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userID, err := strconv.Atoi(vars["user_id"])
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+	mangaID, err := strconv.Atoi(vars["manga_id"])
+	if err != nil {
+		http.Error(w, "Invalid manga ID", http.StatusBadRequest)
+		return
+	}
+
+	rating, err := h.service.GetUserRatingForManga(userID, mangaID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]int{"rating": rating})
 }

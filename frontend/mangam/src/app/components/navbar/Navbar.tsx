@@ -30,9 +30,9 @@ const NavigationBar = () => {
       setIsSearching(true);
       try {
         const response = await fetch(
-          `http://localhost:8080/manga/search?search=${encodeURIComponent(
-            searchTerm
-          )}`
+          `${
+            process.env.NEXT_PUBLIC_API_URL
+          }/manga/search?search=${encodeURIComponent(searchTerm)}`
         );
         const data = await response.json();
         setSearchResults(data);
@@ -56,7 +56,7 @@ const NavigationBar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
-            <Link href="/">
+            <Link href={user && user.is_admin ? "/admin" : "/"}>
               <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent cursor-pointer">
                 MangaVerse
               </h1>

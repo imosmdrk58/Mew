@@ -22,6 +22,57 @@ export const mangaService = {
       throw error;
     }
   },
+
+  async getUserRating(mangaId: string, userId: string): Promise<number> {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/users/${userId}/manga/${mangaId}/rating`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user rating");
+      }
+
+      const data = await response.json();
+      return data.rating;
+    } catch (error) {
+      console.error("Error fetching user rating:", error);
+      throw error;
+    }
+  },
+
+  async rateManga(
+    mangaId: string,
+    userId: string,
+    rating: number,
+    review: string
+  ): Promise<void> {
+    try {
+      console.log("mangaId", mangaId);
+      console.log("userId", userId);
+      console.log("rating", rating);
+      console.log("review", review);
+      const response = await fetch(`http://localhost:8080/manga/rate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          manga_id: mangaId,
+          rating,
+          review,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to rate manga");
+      }
+    } catch (error) {
+      console.error("Error rating manga:", error);
+      throw error;
+    }
+  },
 };
 
 // utils/transformers.ts

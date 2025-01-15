@@ -15,6 +15,7 @@ type MangaRepository interface {
 	DeleteManga(id int) error
 	SearchManga(search string) ([]Manga, error)
 	GetUserFavoriteMangas(id int) ([]Manga, error)
+	RateManga(userID, mangaID, rating int, review string) error
 }
 
 type mangaRepository struct {
@@ -232,4 +233,15 @@ func (r *mangaRepository) GetUserFavoriteMangas(id int) ([]Manga, error) {
 
 	log.Printf("Total manga found: %d", len(mangaList))
 	return mangaList, nil
+}
+
+func (r *mangaRepository) RateManga(userID, mangaID, rating int, review string) error {
+	log.Printf("Rating manga: userID=%d, mangaID=%d, rating=%d, review=%s", userID, mangaID, rating, review)
+	_, err := r.db.Exec("INSERT INTO ratings (user_id, manga_id, rating, review) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, manga_id) DO UPDATE SET rating = $3, review = $4, rated_at = CURRENT_TIMESTAMP", userID, mangaID, rating, review)
+	if err != nil {
+		log.Printf("Error rating manga: %v", err)
+		return err
+	}
+	log.Printf("Manga rated successfully")
+	return nil
 }

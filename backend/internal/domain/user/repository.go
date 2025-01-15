@@ -159,3 +159,16 @@ func (r *UserRepository) GetAllUsers() ([]User, error) {
 
 	return users, nil
 }
+
+func (r *UserRepository) GetUserRatingForManga(userID, mangaID int) (int, error) {
+	var rating int
+	query := `SELECT rating FROM ratings WHERE user_id = $1 AND manga_id = $2`
+	err := r.db.QueryRow(query, userID, mangaID).Scan(&rating)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, nil // Kullanıcı bu manga için henüz puan vermemiş
+		}
+		return 0, fmt.Errorf("failed to get user rating for manga: %v", err)
+	}
+	return rating, nil
+}

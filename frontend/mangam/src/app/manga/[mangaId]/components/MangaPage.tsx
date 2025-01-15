@@ -10,6 +10,7 @@ import { ChapterList } from "./ChapterList";
 import { MangaImage } from "./MangaImage";
 import { FavoriteButton } from "./FavoriteButton";
 import { useAuthStore } from "@/store/userStore";
+import { RatingComponent } from "./RatingComponent";
 
 export const MangaDetailPage = ({ mangaId }: { mangaId: string }) => {
   const [manga, setManga] = useState<Manga | null>(null);
@@ -46,7 +47,8 @@ export const MangaDetailPage = ({ mangaId }: { mangaId: string }) => {
         <div className="md:col-span-2">
           <Card>
             <CardContent className="p-6">
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-between items-center mt-4">
+                <RatingComponent mangaId={mangaId} />
                 <FavoriteButton mangaId={mangaId} userId={userId} />
               </div>
               <MangaDetails
