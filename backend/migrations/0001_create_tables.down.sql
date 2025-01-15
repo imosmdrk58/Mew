@@ -35,7 +35,7 @@ DROP FUNCTION IF EXISTS insert_page(INTEGER, INTEGER,VARCHAR(255));
 DROP FUNCTION IF EXISTS delete_manga_by_id(INTEGER);
 
 -- update manga fonksiyonunu sil
-DROP FUNCTION update_manga(INTEGER, VARCHAR(255), TEXT, manga_status, VARCHAR(255), INTEGER, DATE);
+DROP FUNCTION IF EXISTS update_manga(INTEGER, VARCHAR(255), TEXT, manga_status, VARCHAR(255), INTEGER, DATE);
 
 -- Comments tablosunu sil
 DROP TABLE IF EXISTS comments CASCADE;
