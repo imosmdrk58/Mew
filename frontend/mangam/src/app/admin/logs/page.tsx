@@ -46,17 +46,26 @@ const LogsPage = () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/logs?limit=${itemsPerPage}`
       );
-
+      if (!response.ok) {
+        throw new Error("Loglar yüklenirken hata oluştu.");
+      }
       console.log(response);
 
       const data = await response.json();
-
-      console.log(data);
+      if (data) {
+        console.log(data);
 
       setLogs(data);
       const dataLength = data.length;
 
       setTotalPages(Math.ceil(dataLength / itemsPerPage));
+      }
+      else {
+        console.log("data yok");
+        setLogs([]);
+        setTotalPages(1);
+      }
+      
     } catch (error) {
       console.error("Loglar yüklenirken hata oluştu:", error);
     }
