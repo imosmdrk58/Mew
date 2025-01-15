@@ -431,3 +431,102 @@ BEGIN
     ON CONFLICT (user_id, manga_id) DO NOTHING;
 END;
 $$;
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE logs (
+    log_id SERIAL PRIMARY KEY,
+    table_name VARCHAR(50) NOT NULL,
+    operation_type VARCHAR(20) NOT NULL,
+    record_id INTEGER NOT NULL,
+    old_data JSONB,
+    new_data JSONB,
+    user_id INTEGER REFERENCES users(user_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Log trigger function
+CREATE OR REPLACE FUNCTION log_changes()
+RETURNS TRIGGER AS $$
+DECLARE
+    old_data JSONB := NULL;
+    new_data JSONB := NULL;
+    record_id INTEGER := NULL;
+    current_user_id INTEGER := NULL;
+BEGIN
+    -- Operation type-specific data assignment
+    IF (TG_OP = 'DELETE') THEN
+        old_data = row_to_json(OLD)::JSONB;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        old_data = row_to_json(OLD)::JSONB;
+        new_data = row_to_json(NEW)::JSONB;
+    ELSIF (TG_OP = 'INSERT') THEN
+        new_data = row_to_json(NEW)::JSONB;
+    END IF;
+
+    -- Determine record_id based on the table
+    IF TG_TABLE_NAME = 'manga' THEN
+        record_id = COALESCE(OLD.manga_id, NEW.manga_id);
+    ELSIF TG_TABLE_NAME = 'chapters' THEN
+        record_id = COALESCE(OLD.chapter_id, NEW.chapter_id);
+    ELSIF TG_TABLE_NAME = 'ratings' THEN
+        record_id = COALESCE(OLD.rating_id, NEW.rating_id);
+    END IF;
+
+    -- Get user_id based on CURRENT_USER (username)
+    SELECT user_id INTO current_user_id
+    FROM users
+    WHERE username = CURRENT_USER;
+
+    -- Insert log entry
+    INSERT INTO logs (
+        table_name,
+        operation_type,
+        record_id,
+        old_data,
+        new_data,
+        user_id
+    )
+    VALUES (
+        TG_TABLE_NAME,
+        TG_OP,
+        record_id,
+        old_data,
+        new_data,
+        current_user_id
+    );
+
+    -- Return OLD or NEW record depending on operation type
+    IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+-- Manga tablosu için trigger
+CREATE TRIGGER tr_manga_log
+AFTER INSERT OR UPDATE OR DELETE ON manga
+FOR EACH ROW EXECUTE FUNCTION log_changes();
+
+-- Chapters tablosu için trigger
+CREATE TRIGGER tr_chapters_log
+AFTER INSERT OR UPDATE OR DELETE ON chapters
+FOR EACH ROW EXECUTE FUNCTION log_changes();
+
+-- Ratings tablosu için trigger
+CREATE TRIGGER tr_ratings_log
+AFTER INSERT OR UPDATE OR DELETE ON ratings
+FOR EACH ROW EXECUTE FUNCTION log_changes();

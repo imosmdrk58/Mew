@@ -3,6 +3,7 @@ package chapter
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 type ChapterRepository interface {
@@ -92,6 +93,8 @@ func (r *chapterRepository) GetChapterByMangaIDandChapterNumber(mangaId int, cha
 
 func (r *chapterRepository) CreateChapter(chapter *Chapter) (int, error) {
 	var chapterID int
+
+	log.Print(chapter)
 	err := r.db.QueryRow(
 		"INSERT INTO chapters (title, chapter_number, release_date, manga_id) VALUES ($1, $2, $3, $4) RETURNING chapter_id",
 		chapter.Title, chapter.ChapterNumber, chapter.ReleaseDate, chapter.MangaID,

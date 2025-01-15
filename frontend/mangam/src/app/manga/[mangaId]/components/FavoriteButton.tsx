@@ -54,7 +54,7 @@ export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
       };
       if (isFavorited) {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}favorites/remove`,
+          `${process.env.NEXT_PUBLIC_API_URL}/favorites/remove`,
           {
             method: "DELETE",
             headers: {
@@ -72,7 +72,7 @@ export const FavoriteButton = ({ mangaId, userId }: FavoriteButtonProps) => {
        
         console.log("sent ", JSON.stringify(sentData));
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}favorites/add`,
+          `${process.env.NEXT_PUBLIC_API_URL}/favorites/add`,
           {
             method: "POST",
             headers: {

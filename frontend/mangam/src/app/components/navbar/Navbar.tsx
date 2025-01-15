@@ -97,6 +97,18 @@ const NavigationBar = () => {
                   )}
                 </>
               )}
+
+              {user && user.is_admin && (
+                <Link href="/admin/logs">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center space-x-2 text-gray-300 hover:text-pink-400 hover:bg-gray-800"
+                  >
+                    <span className="text-red-500">!</span>
+                    <span>See Logs</span>
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
 

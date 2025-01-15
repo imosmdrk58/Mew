@@ -31,6 +31,7 @@ func main() {
 	initializers.InitializeAuthorComponents(database, router)
 	initializers.InitializeChapterComponents(database, router)
 	initializers.InitializePageComponents(database, router)
+	initializers.InitializeLogsComponent(database, router)
 
 	// Configure CORS
 	c := cors.New(cors.Options{

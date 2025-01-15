@@ -17,7 +17,7 @@ const handleRemoveFromFavorites = async (userId: string, mangaId: string) => {
         user_id: parseInt(userId),
       };
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}favorites/remove`,
+        `${process.env.NEXT_PUBLIC_API_URL}/favorites/remove`,
         {
           method: "DELETE",
           headers: {
@@ -43,7 +43,7 @@ const FavoritesPage = () => {
         
         const fetchFavorites = async () => {
             try{
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}favorites/user/${userId}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/favorites/user/${userId}`);
             const data = await response.json();
             if (data) {
                 const mangas = data.map((manga: any) => ({
