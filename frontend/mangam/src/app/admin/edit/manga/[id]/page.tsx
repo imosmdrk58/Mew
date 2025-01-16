@@ -66,7 +66,7 @@ const EditMangaPage = () => {
         // Fetch manga and authors in parallel
         const [mangaResponse, authorsResponse] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga/${id}`),
-          fetch("${process.env.NEXT_PUBLIC_API_URL}/authors"),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/authors`),
         ]);
 
         if (!mangaResponse.ok || !authorsResponse.ok) {
