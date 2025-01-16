@@ -5,6 +5,7 @@ interface User {
   userId: string;
   username: string;
   is_admin: boolean;
+  email: string;
 }
 
 interface AuthStore {

@@ -13,6 +13,7 @@ import {
 import { UserIcon, LockIcon, BookOpen, MailIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { GlobalStyles } from "@/gloabalStyles";
+import { useAuthStore } from "@/store/userStore";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -23,6 +24,7 @@ const AuthPage = () => {
     confirmPassword: "",
   });
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const [error, setError] = useState("");
 
@@ -64,9 +66,14 @@ const AuthPage = () => {
       }
 
       const data = await response.json();
+      setUser(data); // Set the user data in the store
+
+      if (data.is_admin) {
+        router.push("/admin");
+        return;
+      }
 
       router.push("/mangalist");
-      router.refresh();
     } catch (err: any) {
       console.error(err);
       setError(err.message);
