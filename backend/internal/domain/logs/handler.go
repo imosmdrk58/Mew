@@ -1,4 +1,4 @@
-// filepath: /Users/melihaltin/Documents/GitHub/MangaReaderWebsite/backend/internal/domain/logs/handler.go
+// filepath: .../logs/handler.go
 package logs
 
 import (
@@ -24,7 +24,7 @@ func (h *LogHandler) RegisterRoutes(router *mux.Router) {
 func (h *LogHandler) GetLogs(w http.ResponseWriter, r *http.Request) {
 	// Get pagination parameters from query string
 	limitStr := r.URL.Query().Get("limit")
-	offsetStr := r.URL.Query().Get("offset")
+	pageStr := r.URL.Query().Get("page") // Değişiklik: offset yerine page kullanıyoruz
 
 	// Set default values if parameters are not provided
 	limit, err := strconv.Atoi(limitStr)
@@ -32,12 +32,15 @@ func (h *LogHandler) GetLogs(w http.ResponseWriter, r *http.Request) {
 		limit = 10 // Default limit
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
-		offset = 0 // Default offset
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1 // Default page
 	}
 
-	logs, err := h.service.GetLogs(limit, offset)
+	// Calculate offset from page
+	offset := (page - 1) * limit
+
+	response, err := h.service.GetLogs(limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -45,5 +48,5 @@ func (h *LogHandler) GetLogs(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(logs)
+	json.NewEncoder(w).Encode(response)
 }

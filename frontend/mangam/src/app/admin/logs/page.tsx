@@ -43,29 +43,29 @@ const LogsPage = () => {
 
   const fetchLogs = async (page: number) => {
     try {
+      const offset = (page - 1) * itemsPerPage;
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/logs?limit=${itemsPerPage}`
+        `${process.env.NEXT_PUBLIC_API_URL}/logs?limit=${itemsPerPage}&page=${page}`
       );
+
       if (!response.ok) {
         throw new Error("Loglar yüklenirken hata oluştu.");
       }
-      console.log(response);
 
       const data = await response.json();
       if (data) {
-        console.log(data);
+        console.log("API Response:", data);
 
-      setLogs(data);
-      const dataLength = data.length;
+        // data artık { logs: Log[], total: number } yapısında
+        setLogs(data.logs);
 
-      setTotalPages(Math.ceil(dataLength / itemsPerPage));
-      }
-      else {
+        // Toplam sayfa sayısını hesapla
+        setTotalPages(Math.ceil(data.total / itemsPerPage));
+      } else {
         console.log("data yok");
         setLogs([]);
         setTotalPages(1);
       }
-      
     } catch (error) {
       console.error("Loglar yüklenirken hata oluştu:", error);
     }

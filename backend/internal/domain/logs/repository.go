@@ -4,6 +4,11 @@ import (
 	"database/sql"
 )
 
+type LogResponse struct {
+	Logs  []Log `json:"logs"`
+	Total int   `json:"total"`
+}
+
 type LogRepository struct {
 	db *sql.DB
 }
@@ -12,20 +17,41 @@ func NewLogRepository(db *sql.DB) *LogRepository {
 	return &LogRepository{db: db}
 }
 
-func (r *LogRepository) GetLogs(limit, offset int) ([]Log, error) {
-	var logs []Log
+// Toplam kayıt sayısını getiren yeni method
+func (r *LogRepository) GetTotalLogs() (int, error) {
+	var total int
+	query := "SELECT COUNT(*) FROM logs"
+	err := r.db.QueryRow(query).Scan(&total)
+	if err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
+func (r *LogRepository) GetLogs(limit, offset int) (LogResponse, error) {
+	var response LogResponse
+
+	// Toplam kayıt sayısını al
+	total, err := r.GetTotalLogs()
+	if err != nil {
+		return response, err
+	}
+
+	// Logları getir
 	query := `
         SELECT log_id, table_name, operation_type, record_id, old_data, new_data, user_id, created_at 
         FROM logs 
         ORDER BY created_at DESC 
         LIMIT $1 OFFSET $2
     `
+
 	rows, err := r.db.Query(query, limit, offset)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 	defer rows.Close()
 
+	var logs []Log
 	for rows.Next() {
 		var log Log
 		var oldData sql.NullString
@@ -42,31 +68,23 @@ func (r *LogRepository) GetLogs(limit, offset int) ([]Log, error) {
 			&userID,
 			&log.CreatedAt,
 		); err != nil {
-			return nil, err
+			return response, err
 		}
 
-		// Convert `sql.NullString` values to `string`
 		if oldData.Valid {
 			log.OldData = oldData.String
-		} else {
-			log.OldData = "" // Assign empty string if NULL
 		}
-
 		if newData.Valid {
 			log.NewData = newData.String
-		} else {
-			log.NewData = ""
 		}
-
-		// Convert `sql.NullInt64` value to `int`
 		if userID.Valid {
 			log.UserID = int(userID.Int64)
-		} else {
-			log.UserID = 0 // Assign default value 0 if NULL
 		}
 
 		logs = append(logs, log)
 	}
 
-	return logs, nil
+	response.Logs = logs
+	response.Total = total
+	return response, nil
 }
