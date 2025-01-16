@@ -3,29 +3,14 @@
 
 import { useEffect, useState } from "react";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import ErrorPage from "@/components/ui/ErrorPage";
 import { useParams } from "next/navigation";
 
-
-
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  HomeIcon, 
-  BookOpen,
-  Settings2
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import ChapterLoading from "../../components/ChapterLoading";
 
 const getNewChapter = async (
   mangaId: string,
@@ -59,21 +44,23 @@ const getNewChapter = async (
 };
 
 const ChapterPage = () => {
-    const { mangaId, chapterId } = useParams();
+  const { mangaId, chapterId } = useParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!mangaId || !chapterId || Array.isArray(mangaId) || Array.isArray(chapterId)) {
+    if (
+      !mangaId ||
+      !chapterId ||
+      Array.isArray(mangaId) ||
+      Array.isArray(chapterId)
+    ) {
       return;
     }
     const fetchChapter = async () => {
       try {
-        const chapterData = await getNewChapter(
-          mangaId,
-          chapterId
-        );
+        const chapterData = await getNewChapter(mangaId, chapterId);
         setChapter(chapterData);
       } catch (error) {
         console.error("Failed to fetch chapter:", error);
@@ -86,7 +73,12 @@ const ChapterPage = () => {
   }, [mangaId, chapterId]);
 
   useEffect(() => {
-    if (!mangaId || !chapterId || Array.isArray(mangaId) || Array.isArray(chapterId)) {
+    if (
+      !mangaId ||
+      !chapterId ||
+      Array.isArray(mangaId) ||
+      Array.isArray(chapterId)
+    ) {
       return;
     }
 
@@ -103,28 +95,33 @@ const ChapterPage = () => {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [chapter, mangaId]);
 
-  if (!mangaId || !chapterId || Array.isArray(mangaId) || Array.isArray(chapterId) || isLoading) {
+  if (
+    !mangaId ||
+    !chapterId ||
+    Array.isArray(mangaId) ||
+    Array.isArray(chapterId) ||
+    isLoading
+  ) {
     return <LoadingSpinner />;
   }
 
   if (!chapter) {
-    return <ErrorPage errorMessage="Chapter not found" />;
+    return <ChapterLoading message="New Chapter is Coming Soon..." />;
   }
 
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
-
-
-  
   const NavigationButtons = () => (
     <div className="flex items-center gap-2">
       <Button
         variant="outline"
         className="bg-black hover:bg-zinc-900 text-white border-zinc-800"
         disabled={!chapter.prevChapter}
-        onClick={() => window.location.href = `/manga/${mangaId}/chapter/${chapter.prevChapter}`}
+        onClick={() =>
+          (window.location.href = `/manga/${mangaId}/chapter/${chapter.prevChapter}`)
+        }
       >
         <ChevronLeft className="h-4 w-4 mr-2" />
         Previous Chapter
@@ -133,14 +130,15 @@ const ChapterPage = () => {
         variant="outline"
         className="bg-black hover:bg-zinc-900 text-white border-zinc-800"
         disabled={!chapter.nextChapter}
-        onClick={() => window.location.href = `/manga/${mangaId}/chapter/${chapter.nextChapter}`}
+        onClick={() =>
+          (window.location.href = `/manga/${mangaId}/chapter/${chapter.nextChapter}`)
+        }
       >
         Next Chapter
         <ChevronRight className="h-4 w-4 ml-2" />
       </Button>
     </div>
   );
-
 
   return (
     <main className="min-h-screen bg-black">
@@ -154,10 +152,7 @@ const ChapterPage = () => {
         {/* Manga Pages */}
         <div className="flex flex-col items-center bg-black space-y-0">
           {chapter.pages.map((page) => (
-            <div 
-              key={page.page_id} 
-              className="w-full relative"
-            >
+            <div key={page.page_id} className="w-full relative">
               <img
                 src={page.url}
                 alt={`Page ${page.page_number}`}
