@@ -5,8 +5,8 @@ export const mangaService = {
   async getMangaDetails(mangaId: string): Promise<Manga> {
     try {
       const [mangaResponse, chaptersResponse] = await Promise.all([
-        fetch(`http://localhost:8080/manga/${mangaId}`),
-        fetch(`http://localhost:8080/manga/${mangaId}/chapters`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga/${mangaId}`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga/${mangaId}/chapters`),
       ]);
 
       if (!mangaResponse.ok || !chaptersResponse.ok) {
@@ -26,7 +26,7 @@ export const mangaService = {
   async getUserRating(mangaId: string, userId: string): Promise<number> {
     try {
       const response = await fetch(
-        `http://localhost:8080/users/${userId}/manga/${mangaId}/rating`
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/manga/${mangaId}/rating`
       );
 
       if (!response.ok) {
@@ -52,18 +52,21 @@ export const mangaService = {
       console.log("userId", userId);
       console.log("rating", rating);
       console.log("review", review);
-      const response = await fetch(`http://localhost:8080/manga/rate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          manga_id: mangaId,
-          rating,
-          review,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/manga/rate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            manga_id: mangaId,
+            rating,
+            review,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to rate manga");

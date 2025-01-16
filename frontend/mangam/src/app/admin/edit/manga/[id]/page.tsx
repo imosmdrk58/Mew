@@ -65,8 +65,8 @@ const EditMangaPage = () => {
       try {
         // Fetch manga and authors in parallel
         const [mangaResponse, authorsResponse] = await Promise.all([
-          fetch(`http://localhost:8080/manga/${id}`),
-          fetch("http://localhost:8080/authors"),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga/${id}`),
+          fetch("${process.env.NEXT_PUBLIC_API_URL}/authors"),
         ]);
 
         if (!mangaResponse.ok || !authorsResponse.ok) {
@@ -183,7 +183,7 @@ const EditMangaPage = () => {
       console.log("Form submitted with values:", JSON.stringify(formData));
 
       const response = await fetch(
-        `http://localhost:8080/manga/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/manga/${id}`,
         {
           method: "PUT",
           headers: {

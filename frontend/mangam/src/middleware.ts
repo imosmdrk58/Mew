@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
 
       // Kullanıcı bilgilerini backend'den kontrol et
       const response = await fetch(
-        `http://localhost:8080/users/${userData.username}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${userData.username}`,
         {
           method: "GET",
           headers: {

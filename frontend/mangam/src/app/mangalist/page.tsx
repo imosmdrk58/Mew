@@ -33,7 +33,7 @@ const MangaListPage = () => {
   useEffect(() => {
     const fetchMangaData = async () => {
       try {
-        const response = await fetch("http://localhost:8080/manga");
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga`);
         console.log("response", response);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

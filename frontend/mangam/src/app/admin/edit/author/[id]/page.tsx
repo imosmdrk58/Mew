@@ -21,7 +21,7 @@ const EditAuthorPage = () => {
     <EditAuthorForm 
       authorId={id} 
       onSuccess={handleSuccess}
-      apiBaseUrl="http://localhost:8080" // opsiyonel, varsayılan değeri var
+      apiBaseUrl={process.env.NEXT_PUBLIC_API_URL}
     />
   )
 }

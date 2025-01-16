@@ -10,7 +10,7 @@ export async function POST() {
     (await cookieStore).delete('session');
 
     // Backend'e logout isteği gönder
-    await fetch('http://localhost:8080/users/logout', {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/logout`, {
       method: 'POST',
       credentials: 'include',
     });

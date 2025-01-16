@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const response = await fetch("http://localhost:8080/users/create-user", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/create-user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
