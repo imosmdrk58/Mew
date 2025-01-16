@@ -387,13 +387,13 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE UpdateUserAdminStatus(is_admin BOOLEAN, username VARCHAR)
+CREATE OR REPLACE PROCEDURE UpdateUserAdminStatus(user_is_admin BOOLEAN, target_username VARCHAR)
 LANGUAGE plpgsql
 AS $$
 BEGIN
     UPDATE users
-    SET is_admin = is_admin
-    WHERE username = username;
+    SET is_admin = user_is_admin
+    WHERE username = target_username;
 END;
 $$;
 
