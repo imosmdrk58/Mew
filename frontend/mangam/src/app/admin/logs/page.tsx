@@ -40,8 +40,16 @@ const LogsPage = () => {
   const itemsPerPage = 10;
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
+  // Cache için yeni state
+  const [cachedLogs, setCachedLogs] = useState<{ [key: number]: Log[] }>({});
 
   const fetchLogs = async (page: number) => {
+    // Eğer sayfa cache'de varsa, API'ye istek atmadan cache'den getir
+    if (cachedLogs[page]) {
+      setLogs(cachedLogs[page]);
+      return;
+    }
+
     try {
       const offset = (page - 1) * itemsPerPage;
       const response = await fetch(
@@ -56,10 +64,13 @@ const LogsPage = () => {
       if (data) {
         console.log("API Response:", data);
 
-        // data artık { logs: Log[], total: number } yapısında
-        setLogs(data.logs);
+        // Cache'e yeni verileri ekle
+        setCachedLogs((prev) => ({
+          ...prev,
+          [page]: data.logs,
+        }));
 
-        // Toplam sayfa sayısını hesapla
+        setLogs(data.logs);
         setTotalPages(Math.ceil(data.total / itemsPerPage));
       } else {
         console.log("data yok");
@@ -70,7 +81,6 @@ const LogsPage = () => {
       console.error("Loglar yüklenirken hata oluştu:", error);
     }
   };
-
   useEffect(() => {
     fetchLogs(currentPage);
   }, [currentPage]);
