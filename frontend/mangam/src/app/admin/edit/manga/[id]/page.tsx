@@ -79,8 +79,8 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
       try {
         // Fetch manga and authors in parallel
         const [mangaResponse, authorsResponse] = await Promise.all([
-          fetch(`http://localhost:8080/manga/${params.id}`),
-          fetch("http://localhost:8080/authors"),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga/${params.id}`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/authors`),
         ]);
 
         if (!mangaResponse.ok || !authorsResponse.ok) {
@@ -171,7 +171,7 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
       console.log("Form submitted with values:", JSON.stringify(formData));
 
       const response = await fetch(
-        `http://localhost:8080/manga/${params.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/manga/${params.id}`,
         {
           method: "PUT",
           headers: {

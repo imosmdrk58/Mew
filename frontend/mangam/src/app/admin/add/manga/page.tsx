@@ -54,7 +54,9 @@ const AddMangaPage = () => {
   useEffect(() => {
     const fetchAuthors = async () => {
       try {
-        const response = await fetch("http://localhost:8080/authors");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/authors`
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -98,13 +100,16 @@ const AddMangaPage = () => {
 
       console.log("Form submitted with values:", JSON.stringify(data));
 
-      const response = await fetch("http://localhost:8080/manga/create-manga", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/manga/create-manga`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
       console.log("API response status:", response.status);
 

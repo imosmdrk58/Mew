@@ -12,7 +12,7 @@ const getNewChapter = async (
   chapterNumber: string
 ): Promise<Chapter | null> => {
   const response = await fetch(
-    `http://localhost:8080/manga/${mangaId}/chapters/${chapterNumber}`
+    `${process.env.NEXT_PUBLIC_API_URL}/manga/${mangaId}/chapters/${chapterNumber}`
   );
   if (response.ok) {
     const data = await response.json();

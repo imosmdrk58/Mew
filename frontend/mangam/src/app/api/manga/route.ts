@@ -17,7 +17,7 @@ export async function postHandler(req: NextApiRequest, res: NextApiResponse) {
     console.log("limit", limit);
     console.log(
       "Url" +
-        `http://localhost:8080/manga?limit=${limit}&sort_by=${sort_by}&sort_order=${sort_order}`
+        `${process.env.NEXT_PUBLIC_API_URL}/manga?limit=${limit}&sort_by=${sort_by}&sort_order=${sort_order}`
     );
 
     // Harici API'ye istek yap

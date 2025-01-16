@@ -22,7 +22,7 @@ const EditAuthorPage =({ params }: { params: { id: string } }) => {
   useEffect(() => {
     const fetchAuthor = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/authors/${params.id}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/authors/${params.id}`)
         if (!response.ok) throw new Error('Failed to fetch author')
         const author = await response.json()
         setFormData({
@@ -67,7 +67,7 @@ const EditAuthorPage =({ params }: { params: { id: string } }) => {
         }
 
         console.log('Form submitted with values:', JSON.stringify(newData));
-      const response = await fetch('http://localhost:8080/authors/update', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/authors/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     // Backend'den kullanıcı bilgilerini kontrol et
     const response = await fetch(
-      `http://localhost:8080/users/${userData.username}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/users/${userData.username}`,
       {
         method: "GET",
         headers: {

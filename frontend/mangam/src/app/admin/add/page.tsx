@@ -23,7 +23,7 @@ const AddPage = () => {
 
   const fetchMangas = async () => {
     try {
-      const response = await fetch("http://localhost:8080/manga");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

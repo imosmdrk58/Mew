@@ -52,7 +52,7 @@ const addPageToChapter = async (
   };
   console.log("Form submitted with values:", JSON.stringify(sentData));
   const response = await fetch(
-    `http://localhost:8080/chapters/${chapterId}/pages`,
+    `${process.env.NEXT_PUBLIC_API_URL}/chapters/${chapterId}/pages`,
     {
       method: "POST",
       headers: {
@@ -115,7 +115,7 @@ const AddChapterPage = () => {
       console.log("Form submitted with values:", JSON.stringify(sentData));
 
       const response = await fetch(
-        `http://localhost:8080/manga/${params.mangaId}/chapters/create-chapter`,
+        `${process.env.NEXT_PUBLIC_API_URL}/manga/${params.mangaId}/chapters/create-chapter`,
         {
           method: "POST",
           headers: {

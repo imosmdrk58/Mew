@@ -40,7 +40,7 @@ export default function AddAuthorPage() {
         }
 
         console.log('Form submitted with values:', JSON.stringify(newData));
-      const response = await fetch('http://localhost:8080/authors/create-author', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/authors/create-author`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
