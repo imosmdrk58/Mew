@@ -1,17 +1,16 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 
-export async function postHandler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
-
+export async function POST(request: Request) {
   try {
-    // Body'den verileri al
-    const { limit, sort_by, sort_order } = req.body;
+    // Get data from request body
+    const { limit, sort_by, sort_order } = await request.json();
 
-    // Eksik parametre kontrolü
+    // Check for missing parameters
     if (!limit || !sort_by || !sort_order) {
-      return res.status(400).json({ message: "Missing parameters in body" });
+      return NextResponse.json(
+        { message: "Missing parameters in body" },
+        { status: 400 }
+      );
     }
 
     console.log("limit", limit);
@@ -20,18 +19,19 @@ export async function postHandler(req: NextApiRequest, res: NextApiResponse) {
         `http://localhost:8080/manga?limit=${limit}&sort_by=${sort_by}&sort_order=${sort_order}`
     );
 
-    // Harici API'ye istek yap
+    // Make request to external API
     const response = await fetch(
       `${process.env.API_URL}/manga?limit=${limit}&sort_by=${sort_by}&sort_order=${sort_order}`
     );
     const data = await response.json();
 
-    // İstemciye yanıt gönder
-    res.status(200).json(data);
+    // Return response to client
+    return NextResponse.json(data);
   } catch (error) {
     console.error("Error fetching manga:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
-
-export { postHandler as POST };
