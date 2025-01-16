@@ -4,16 +4,16 @@
 import { use } from "react";
 import { MangaDetailPage } from "./components/MangaPage";
 import { useParams } from "next/navigation";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
-interface PageProps {
-  params: {
-    mangaId: string;
-  };
-}
 
-const Page = ({ params }: PageProps) => {
-  params = useParams();
-  return <MangaDetailPage mangaId={params.mangaId} />;
+
+const Page = () => {
+  const {mangaId }= useParams();
+  if (!mangaId || Array.isArray(mangaId)) {
+    return <LoadingSpinner />;
+  }
+  return <MangaDetailPage mangaId={mangaId} />;
 };
 
 export default Page;

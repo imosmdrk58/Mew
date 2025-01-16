@@ -6,6 +6,26 @@ import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import ErrorPage from "@/components/ui/ErrorPage";
+import { useParams } from "next/navigation";
+
+
+
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  HomeIcon, 
+  BookOpen,
+  Settings2
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 
 const getNewChapter = async (
   mangaId: string,
@@ -38,36 +58,21 @@ const getNewChapter = async (
   return null;
 };
 
-const ChapterPage = ({
-  params,
-}: {
-  params: { mangaId: string; chapterId: string };
-}) => {
+const ChapterPage = () => {
+    const { mangaId, chapterId } = useParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [resolvedParams, setResolvedParams] = useState<{
-    mangaId: string;
-    chapterId: string;
-  } | null>(null);
 
   useEffect(() => {
-    const resolveParams = async () => {
-      const unwrappedParams = await params;
-      setResolvedParams(unwrappedParams);
-    };
-    resolveParams();
-  }, [params]);
-
-  useEffect(() => {
-    if (!resolvedParams) return;
-
+    if (!mangaId || !chapterId || Array.isArray(mangaId) || Array.isArray(chapterId)) {
+      return;
+    }
     const fetchChapter = async () => {
       try {
-        console.log("paramasv Ş ", resolvedParams);
         const chapterData = await getNewChapter(
-          resolvedParams.mangaId,
-          resolvedParams.chapterId
+          mangaId,
+          chapterId
         );
         setChapter(chapterData);
       } catch (error) {
@@ -78,24 +83,27 @@ const ChapterPage = ({
     };
 
     fetchChapter();
-  }, [resolvedParams]);
+  }, [mangaId, chapterId]);
+
   useEffect(() => {
-    if (!resolvedParams || !chapter) return;
+    if (!mangaId || !chapterId || Array.isArray(mangaId) || Array.isArray(chapterId)) {
+      return;
+    }
 
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" && chapter?.nextChapter) {
-        window.location.href = `/manga/${resolvedParams.mangaId}/chapter/${chapter.nextChapter}`;
+        window.location.href = `/manga/${mangaId}/chapter/${chapter.nextChapter}`;
       }
       if (e.key === "ArrowLeft" && chapter?.prevChapter) {
-        window.location.href = `/manga/${resolvedParams.mangaId}/chapter/${chapter.prevChapter}`;
+        window.location.href = `/manga/${mangaId}/chapter/${chapter.prevChapter}`;
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [chapter, resolvedParams]);
+  }, [chapter, mangaId]);
 
-  if (!resolvedParams || isLoading) {
+  if (!mangaId || !chapterId || Array.isArray(mangaId) || Array.isArray(chapterId) || isLoading) {
     return <LoadingSpinner />;
   }
 
@@ -107,66 +115,62 @@ const ChapterPage = ({
     return <LoadingSpinner />;
   }
 
+
+
+  
+  const NavigationButtons = () => (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        className="bg-black hover:bg-zinc-900 text-white border-zinc-800"
+        disabled={!chapter.prevChapter}
+        onClick={() => window.location.href = `/manga/${mangaId}/chapter/${chapter.prevChapter}`}
+      >
+        <ChevronLeft className="h-4 w-4 mr-2" />
+        Previous Chapter
+      </Button>
+      <Button
+        variant="outline"
+        className="bg-black hover:bg-zinc-900 text-white border-zinc-800"
+        disabled={!chapter.nextChapter}
+        onClick={() => window.location.href = `/manga/${mangaId}/chapter/${chapter.nextChapter}`}
+      >
+        Next Chapter
+        <ChevronRight className="h-4 w-4 ml-2" />
+      </Button>
+    </div>
+  );
+
+
   return (
-    <main className="min-h-screen bg-gray-900">
+    <main className="min-h-screen bg-black">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Chapter Navigation */}
-        <div className="flex justify-between items-center mb-6 text-white">
-          <div className="flex gap-4">
-            {chapter.prevChapter && (
-              <a
-                href={`/manga/${resolvedParams.mangaId}/chapter/${chapter.prevChapter}`}
-                className="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 transition"
-              >
-                Previous Chapter
-              </a>
-            )}
-            {chapter.nextChapter && (
-              <a
-                href={`/manga/${resolvedParams.mangaId}/chapter/${chapter.nextChapter}`}
-                className="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 transition"
-              >
-                Next Chapter
-              </a>
-            )}
-          </div>
-          <h1 className="text-xl font-bold">{chapter.title}</h1>
+        {/* Top Navigation */}
+        <div className="flex justify-between items-center mb-8">
+          <NavigationButtons />
+          <h1 className="text-xl font-medium text-white">{chapter.title}</h1>
         </div>
 
-        {/* Chapter Images */}
-        <div className="flex flex-col items-center space-y-0">
+        {/* Manga Pages */}
+        <div className="flex flex-col items-center bg-black space-y-0">
           {chapter.pages.map((page) => (
-            <div key={page.page_id} className="w-full relative">
-              {/* Once backend is ready, replace src with actual image URL */}
+            <div 
+              key={page.page_id} 
+              className="w-full relative"
+            >
               <img
                 src={page.url}
                 alt={`Page ${page.page_number}`}
-                className="w-full h-auto"
+                className="w-full h-auto object-contain"
+                loading="lazy"
               />
             </div>
           ))}
         </div>
 
         {/* Bottom Navigation */}
-        <div className="flex justify-between items-center mt-6 text-white">
-          <div className="flex gap-4">
-            {chapter.prevChapter && (
-              <a
-                href={`/manga/${resolvedParams.mangaId}/chapter/${chapter.prevChapter}`}
-                className="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 transition"
-              >
-                Previous Chapter
-              </a>
-            )}
-            {chapter.nextChapter && (
-              <a
-                href={`/manga/${resolvedParams.mangaId}/chapter/${chapter.nextChapter}`}
-                className="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 transition"
-              >
-                Next Chapter
-              </a>
-            )}
-          </div>
+        <div className="flex justify-center mt-8">
+          <NavigationButtons />
         </div>
       </div>
     </main>

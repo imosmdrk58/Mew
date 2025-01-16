@@ -32,29 +32,15 @@ const formSchema = z.object({
   publishedDate: z.string().min(1, "Yayın tarihi zorunludur"),
 });
 
-interface Author {
-  author_id: number;
-  name: string;
-  bio: string;
-}
 
-interface MangaData {
-  manga_id: number;
-  title: string;
-  description: string;
-  status: string;
-  cover_image: string;
-  author_id: number;
-  published_date: string;
-}
 
-const EditMangaPage = ({ params }: { params: { id: string } }) => {
-  params = useParams();
+const EditMangaPage = () => {
+  const {id} = useParams();
   const router = useRouter();
   const [authors, setAuthors] = useState<Author[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [originalData, setOriginalData] = useState<MangaData | null>(null);
+  const [originalData, setOriginalData] = useState<Manga | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -71,7 +57,7 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
 
   // Fetch authors
   useEffect(() => {
-    let mangaData: MangaData | null = null;
+    let mangaData: Manga | null = null;
     let authorsData: Author[] = [];
 
     const fetchData = async () => {
@@ -79,8 +65,8 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
       try {
         // Fetch manga and authors in parallel
         const [mangaResponse, authorsResponse] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga/${params.id}`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/authors`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga/${id}`),
+          fetch("${process.env.NEXT_PUBLIC_API_URL}/authors"),
         ]);
 
         if (!mangaResponse.ok || !authorsResponse.ok) {
@@ -88,7 +74,7 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
         }
 
         // Get both responses
-        mangaData = await mangaResponse.json();
+        const mangaResult = await mangaResponse.json();
         const authorsResult = await authorsResponse.json();
 
         // Process authors data
@@ -97,6 +83,30 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
           name: author.name,
           bio: author.bio,
         }));
+
+        if (mangaResult) {
+          mangaData = {
+            manga_id: mangaResult.manga_id,
+            title: mangaResult.title,
+            genre: "",
+            description: mangaResult.description,
+            cover_image: mangaResult.cover_image,
+            status: mangaResult.status,
+            published_date: mangaResult.published_date,
+            last_updated: mangaResult.last_updated,
+            genres: [],
+            chapters: [],
+            author: { author_id: mangaResult.author_id, name: "", bio: "" },
+          }
+          const author = authorsData.find((author) => author.author_id === mangaResult?.author_id);
+          if (author) {
+            mangaData.author = {
+              author_id: author.author_id,
+              name: author.name,
+              bio: author.bio,
+            };
+          }
+        }
 
         // Set states
         setOriginalData(mangaData);
@@ -112,7 +122,7 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
         // Reset form with all data
         form.reset({
           title: mangaData.title,
-          authorId: mangaData.author_id.toString(),
+          authorId: mangaData.author.author_id.toString(),
           description: mangaData.description,
           status: mangaData.status,
           coverImage: mangaData.cover_image || "",
@@ -127,7 +137,7 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
     };
 
     fetchData();
-  }, [params.id, form]);
+  }, [id, form]);
 
   // Watch form changes
   useEffect(() => {
@@ -136,7 +146,7 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
         const formValues = form.getValues();
         const hasFormChanges =
           formValues.title !== originalData.title ||
-          formValues.authorId !== originalData.author_id.toString() ||
+          formValues.authorId !== originalData.author.author_id.toString() ||
           formValues.description !== originalData.description ||
           formValues.status !== originalData.status ||
           formValues.coverImage !== originalData.cover_image ||
@@ -157,9 +167,11 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
 
     try {
       setSubmitError(null);
-
+      if (id == undefined || Array.isArray(id)) {
+        return;
+      }
       const formData = {
-        manga_id: parseInt(params.id, 10),
+        manga_id: parseInt(id, 10),
         title: values.title,
         description: values.description,
         status: values.status,
@@ -171,7 +183,7 @@ const EditMangaPage = ({ params }: { params: { id: string } }) => {
       console.log("Form submitted with values:", JSON.stringify(formData));
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/manga/${params.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/manga/${id}`,
         {
           method: "PUT",
           headers: {
