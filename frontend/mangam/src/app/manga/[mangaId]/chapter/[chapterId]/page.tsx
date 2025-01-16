@@ -152,11 +152,11 @@ const ChapterPage = () => {
         </div>
 
         {/* Manga Pages */}
-        <div className="flex flex-col items-center bg-black">
+        <div className="flex flex-col items-center bg-black space-y-0">
           {chapter.pages.map((page) => (
             <div 
               key={page.page_id} 
-              className="w-full mb-1"
+              className="w-full relative"
             >
               <img
                 src={page.url}
