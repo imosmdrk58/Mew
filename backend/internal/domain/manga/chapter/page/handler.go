@@ -25,6 +25,7 @@ func NewPageHandler(service PageService) PageHandler {
 func (h *pageHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/chapters/{chapter_id}/pages", h.GetPagesByChapterID).Methods("GET")
 	router.HandleFunc("/chapters/{chapter_id}/pages", h.CreatePage).Methods("POST")
+	router.HandleFunc("/pages/update", h.UpdatePage).Methods("PUT")
 }
 
 func (h *pageHandler) GetPagesByChapterID(w http.ResponseWriter, r *http.Request) {
@@ -58,5 +59,21 @@ func (h *pageHandler) CreatePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(page)
+}
+
+func (h *pageHandler) UpdatePage(w http.ResponseWriter, r *http.Request) {
+	var page Page
+	if err := json.NewDecoder(r.Body).Decode(&page); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.UpdatePage(&page); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(page)
 }

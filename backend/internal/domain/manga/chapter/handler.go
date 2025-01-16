@@ -13,6 +13,7 @@ type ChapterHandler interface {
 	GetAllChapters(w http.ResponseWriter, r *http.Request)
 	GetChapterByID(w http.ResponseWriter, r *http.Request)
 	CreateChapter(w http.ResponseWriter, r *http.Request)
+	UpdateChapter(w http.ResponseWriter, r *http.Request)
 }
 
 type chapterHandler struct {
@@ -27,6 +28,10 @@ func (h *chapterHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/manga/{id}/chapters", h.GetAllChapters).Methods("GET")
 	router.HandleFunc("/manga/chapters/{id}", h.GetChapterByID).Methods("GET")
 	router.HandleFunc("/manga/{manga_id}/chapters/{chapter_number}", h.GetChapterByMangaIDandChapterNumber).Methods("GET")
+	router.HandleFunc("/manga/{manga_id}/chapters/{chapter_number}", h.UpdateChapter).Methods("PUT")
+
+	router.HandleFunc("/chapters/{chapter_id}", h.DeleteChapter).Methods("DELETE")
+
 	router.HandleFunc("/manga/{id}/chapters/create-chapter", h.CreateChapter).Methods("POST")
 }
 
@@ -116,4 +121,36 @@ func (h *chapterHandler) CreateChapter(w http.ResponseWriter, r *http.Request) {
 	chapter.ID = chapterId
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(chapter)
+}
+
+func (h *chapterHandler) UpdateChapter(w http.ResponseWriter, r *http.Request) {
+	var chapter Chapter
+	if err := json.NewDecoder(r.Body).Decode(&chapter); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.UpdateChapter(&chapter); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(chapter)
+}
+
+func (h *chapterHandler) DeleteChapter(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	chapter_id, err := strconv.Atoi(vars["chapter_id"])
+	if err != nil {
+		http.Error(w, "Invalid chapter ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.DeleteChapter(chapter_id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

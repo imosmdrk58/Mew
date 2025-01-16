@@ -3,6 +3,7 @@ package page
 type PageService interface {
 	GetPagesByChapterID(chapterID int) ([]Page, error)
 	CreatePage(page *Page) error
+	UpdatePage(page *Page) error
 }
 
 type pageService struct {
@@ -19,4 +20,8 @@ func (s *pageService) GetPagesByChapterID(chapterID int) ([]Page, error) {
 
 func (s *pageService) CreatePage(page *Page) error {
 	return s.repo.CreatePage(page)
+}
+
+func (s *pageService) UpdatePage(page *Page) error {
+	return s.repo.UpdatePage(page)
 }

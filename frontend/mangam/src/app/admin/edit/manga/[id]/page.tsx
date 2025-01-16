@@ -2,26 +2,17 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useParams, useRouter } from "next/navigation";
+import { Pencil, Trash2 } from "lucide-react";
+import { release } from "os";
 
 const formSchema = z.object({
   title: z.string().min(1, "Başlık zorunludur"),
@@ -38,6 +29,7 @@ const EditMangaPage = () => {
   const {id} = useParams();
   const router = useRouter();
   const [authors, setAuthors] = useState<Author[]>([]);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [originalData, setOriginalData] = useState<Manga | null>(null);
@@ -64,9 +56,10 @@ const EditMangaPage = () => {
       setIsLoading(true);
       try {
         // Fetch manga and authors in parallel
-        const [mangaResponse, authorsResponse] = await Promise.all([
+        const [mangaResponse, authorsResponse,chaptersResponse] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga/${id}`),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/authors`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/manga/${id}/chapters`)
         ]);
 
         if (!mangaResponse.ok || !authorsResponse.ok) {
@@ -76,6 +69,7 @@ const EditMangaPage = () => {
         // Get both responses
         const mangaResult = await mangaResponse.json();
         const authorsResult = await authorsResponse.json();
+        const chaptersData = await chaptersResponse.json();
 
         // Process authors data
         authorsData = authorsResult.map((author: any) => ({
@@ -107,13 +101,22 @@ const EditMangaPage = () => {
             };
           }
         }
+        
+        if (!mangaData) {
+          throw new Error("Manga verisi bulunamadı");
+        }
 
         // Set states
         setOriginalData(mangaData);
         setAuthors(authorsData);
-        if (!mangaData) {
-          throw new Error("Manga verisi bulunamadı");
-        }
+        const sentChapters = chaptersData.map((chapter: any) => ({
+          chapter_id: chapter.id,
+          manga_id: chapter.manga_id,
+          chapter_number: chapter.chapter_number,
+          title: chapter.title,
+          release_date: chapter.release_date,
+        }));
+        setChapters(sentChapters);
 
         // Format the date
         const formattedDate = new Date(mangaData.published_date)
@@ -205,17 +208,49 @@ const EditMangaPage = () => {
     }
   }
 
+  const handleEditChapter = (chapterId: number) => {
+    router.push(`/admin/edit/manga/${id}/chapter/${chapterId}`);
+  };
+
+  const handleDeleteChapter = async (chapterId: number) => {
+    if (!confirm("Bu bölümü silmek istediğinizden emin misiniz?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/chapters/${chapterId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Bölüm silinirken bir hata oluştu");
+      }
+
+      setChapters(chapters.filter(chapter => chapter.chapter_id !== chapterId));
+    } catch (error) {
+      console.error("Error deleting chapter:", error);
+      setSubmitError("Bölüm silinirken bir hata oluştu.");
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-8 pt-16">
-      <Card className="max-w-3xl mx-auto bg-white shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-        <CardHeader className="space-y-1 border-b border-gray-100 p-6">
-          <CardTitle className="text-2xl font-medium text-gray-900">
-            Manga Düzenle
-          </CardTitle>
-          <p className="text-sm text-gray-500">Manga bilgilerini güncelleyin</p>
-        </CardHeader>
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Manga Edit Form */}
+        <div className="lg:col-span-2">
+          <Card className="bg-white shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+            <CardHeader className="space-y-1 border-b border-gray-100 p-6">
+              <CardTitle className="text-2xl font-medium text-gray-900">
+                Manga Düzenle
+              </CardTitle>
+              <p className="text-sm text-gray-500">Manga bilgilerini güncelleyin</p>
+            </CardHeader>
 
-        <CardContent className="p-6 space-y-8">
+            <CardContent className="p-6 space-y-8">
           {submitError && (
             <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
               <p className="text-red-700 text-sm">{submitError}</p>
@@ -396,7 +431,76 @@ const EditMangaPage = () => {
             </form>
           </Form>
         </CardContent>
-      </Card>
+          </Card>
+        </div>
+
+        {/* Chapters List */}
+        <div className="lg:col-span-1">
+          <Card className="bg-white shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+            <CardHeader className="space-y-1 border-b border-gray-100 p-6">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-xl font-medium text-gray-900">
+                  Bölümler
+                </CardTitle>
+                <Button
+                  onClick={() => router.push(`/admin/add/manga/${id}/`)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  size="sm"
+                > 
+                  Yeni Bölüm
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              {chapters.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-16">Bölüm</TableHead>
+                        <TableHead>Başlık</TableHead>
+                        <TableHead className="w-24">İşlemler</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {chapters.map((chapter) => (
+                        <TableRow key={chapter.chapter_number}>
+                          <TableCell className="font-medium">{chapter.chapter_number}</TableCell>
+                          <TableCell>{chapter.title}</TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditChapter(chapter.chapter_number)}
+                                className="h-8 w-8 text-blue-500 hover:text-blue-600"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteChapter(chapter.chapter_id)}
+                                className="h-8 w-8 text-red-500 hover:text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-6 text-gray-500">
+                  Henüz bölüm eklenmemiş
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };

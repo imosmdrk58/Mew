@@ -11,6 +11,8 @@ type ChapterRepository interface {
 	GetChapterByID(id int) (*Chapter, error)
 	GetChapterByMangaIDandChapterNumber(mangaId int, chapterNumber int) (*Chapter, error)
 	CreateChapter(chapter *Chapter) (int, error)
+	UpdateChapter(chapter *Chapter) error
+	DeleteChapter(chapter_id int) error
 }
 
 type chapterRepository struct {
@@ -105,4 +107,17 @@ func (r *chapterRepository) CreateChapter(chapter *Chapter) (int, error) {
 	}
 
 	return chapterID, nil
+}
+
+func (r *chapterRepository) UpdateChapter(chapter *Chapter) error {
+	_, err := r.db.Exec(
+		"UPDATE chapters SET title = $2,chapter_number = $3,release_date = $4 WHERE chapter_id = $1;",
+		chapter.ID, chapter.Title, chapter.ChapterNumber, chapter.ReleaseDate,
+	)
+	return err
+}
+
+func (r *chapterRepository) DeleteChapter(chapter_id int) error {
+	_, err := r.db.Exec("DELETE FROM chapters WHERE chapter_id = $1", chapter_id)
+	return err
 }

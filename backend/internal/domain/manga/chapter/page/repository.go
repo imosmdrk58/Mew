@@ -7,6 +7,7 @@ import (
 type PageRepository interface {
 	GetPagesByChapterID(chapterID int) ([]Page, error)
 	CreatePage(page *Page) error
+	UpdatePage(page *Page) error
 }
 
 type pageRepository struct {
@@ -38,6 +39,12 @@ func (r *pageRepository) GetPagesByChapterID(chapterID int) ([]Page, error) {
 
 func (r *pageRepository) CreatePage(page *Page) error {
 	_, err := r.db.Exec("SELECT insert_page($1, $2, $3)",
+		page.ChapterID, page.PageNumber, page.ImageURL)
+	return err
+}
+
+func (r *pageRepository) UpdatePage(page *Page) error {
+	_, err := r.db.Exec("SELECT update_page_image_url($1, $2, $3)",
 		page.ChapterID, page.PageNumber, page.ImageURL)
 	return err
 }

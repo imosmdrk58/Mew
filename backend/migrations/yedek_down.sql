@@ -17,6 +17,7 @@ DROP FUNCTION IF EXISTS add_manga_with_author(VARCHAR, TEXT, manga_status, VARCH
 DROP FUNCTION IF EXISTS insert_page(INT, INT, VARCHAR);
 DROP FUNCTION IF EXISTS update_manga(INT, VARCHAR, TEXT, manga_status, VARCHAR, INT, DATE);
 DROP FUNCTION IF EXISTS delete_manga_by_id(INT);
+DROP FUNCTION IF EXISTS update_page_image_url(INT,INT,VARCHAR);
 
 -- Stored Procedure'ları sil
 DROP PROCEDURE IF EXISTS DeleteUserByUsername(VARCHAR);

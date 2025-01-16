@@ -269,6 +269,25 @@ END;
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION update_page_image_url(
+    p_chapter_id INTEGER,
+    p_page_number INTEGER,
+    p_image_url VARCHAR(255)
+) RETURNS VOID AS $$
+BEGIN
+    UPDATE pages
+    SET image_url = p_image_url
+    WHERE chapter_id = p_chapter_id
+      AND page_number = p_page_number;
+    
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Belirtilen chapter_id ve page_number ile eşleşen bir sayfa bulunamadı.'
+            USING ERRCODE = 'P0001';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- Trigger fonksiyonu
 CREATE OR REPLACE FUNCTION delete_manga_when_author_deleted()
 RETURNS TRIGGER AS $$
@@ -298,12 +317,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+
+
 -- Trigger
 CREATE TRIGGER tr_author_delete_manga
     BEFORE DELETE
     ON authors
     FOR EACH ROW
     EXECUTE FUNCTION delete_manga_when_author_deleted();
+
+
 
 
 -- view
