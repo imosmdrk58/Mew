@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         username,
         email,
         password_hash: hashedPassword,
-        is_admin: true, // todo: admin atamak için kendinizi register yaparken bunu yorumdan kaldırın
+        is_admin: false, // todo: admin atamak için kendinizi register yaparken bunu yorumdan kaldırın
       }),
     });
 
