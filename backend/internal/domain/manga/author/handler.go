@@ -9,11 +9,11 @@ import (
 )
 
 type AuthorHandler struct {
-	repo AuthorRepository
+	service AuthorService
 }
 
-func NewAuthorHandler(repo AuthorRepository) *AuthorHandler {
-	return &AuthorHandler{repo: repo}
+func NewAuthorHandler(service AuthorService) *AuthorHandler {
+	return &AuthorHandler{service: service}
 }
 
 func (h *AuthorHandler) RegisterRoutes(router *mux.Router) {
@@ -26,7 +26,7 @@ func (h *AuthorHandler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *AuthorHandler) GetAllAuthors(w http.ResponseWriter, r *http.Request) {
-	authors, err := h.repo.GetAllAuthors()
+	authors, err := h.service.GetAllAuthors()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -44,7 +44,7 @@ func (h *AuthorHandler) GetAuthorByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	author, err := h.repo.GetAuthorByID(id)
+	author, err := h.service.GetAuthorByID(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -65,7 +65,7 @@ func (h *AuthorHandler) CreateAuthor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.repo.CreateAuthor(&author); err != nil {
+	if err := h.service.CreateAuthor(&author); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -82,7 +82,7 @@ func (h *AuthorHandler) GetAuthorByMangaID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	author, err := h.repo.GetAuthorByMangaID(mangaID)
+	author, err := h.service.GetAuthorByMangaID(mangaID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -103,7 +103,7 @@ func (h *AuthorHandler) UpdateAuthor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.repo.UpdateAuthor(&author); err != nil {
+	if err := h.service.UpdateAuthor(&author); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -119,7 +119,7 @@ func (h *AuthorHandler) DeleteAuthor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.repo.DeleteAuthor(author.AuthorID); err != nil {
+	if err := h.service.DeleteAuthor(author.AuthorID); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

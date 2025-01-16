@@ -4,12 +4,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";
 import Link from "next/link";
 
-type Manga = {
-  manga_id: number;
-  title: string;
-  cover_image: string;
-  rating: number;
-};
 
 const MangaHomepage = () => {
   const [newManga, setNewManga] = useState<Manga[]>([]);
