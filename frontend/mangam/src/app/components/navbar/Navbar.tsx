@@ -58,7 +58,7 @@ const NavigationBar = () => {
           <div className="flex items-center space-x-8">
             <Link href={user && user.is_admin ? "/admin" : "/"}>
               <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent cursor-pointer">
-                MangaVerse
+                Alice Scans 
               </h1>
             </Link>
 
@@ -117,7 +117,7 @@ const NavigationBar = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 className="pl-10 w-64 bg-gray-800 border-gray-700 focus:border-purple-500 text-gray-200 placeholder:text-gray-500"
-                placeholder="Search manga..."
+                placeholder="Manga ara..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -158,7 +158,7 @@ const NavigationBar = () => {
               </Link>
             ) : (
               <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700">
-                <Link href="/auth">Sign In</Link>
+                <Link href="/auth">kayıt ol</Link>
               </Button>
             )}
           </div>
