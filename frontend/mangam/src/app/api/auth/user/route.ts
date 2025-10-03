@@ -1,19 +1,21 @@
 // app/api/user/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const cookieStore = cookies();
-  const userCookie = (await cookieStore).get("user");
+  const userCookie = cookieStore.get("user"); // ✅ await gerek yok
 
+  // Cookie yoksa → Unauthorized
   if (!userCookie) {
     return NextResponse.json({ user: null }, { status: 401 });
   }
 
   try {
+    // Cookie'den user bilgisi al
     const userData = JSON.parse(userCookie.value);
 
-    // Backend'den kullanıcı bilgilerini kontrol et
+    // Backend API'den kullanıcı detaylarını çek
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/users/${userData.username}`,
       {
@@ -30,6 +32,7 @@ export async function GET(request: NextRequest) {
 
     const userDetails = await response.json();
 
+    // Cookie'deki + Backend'deki veriyi birleştirip dön
     return NextResponse.json(
       {
         user: {
@@ -40,6 +43,9 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    return NextResponse.json({ error: "Invalid user data" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Invalid user data" },
+      { status: 401 }
+    );
   }
 }
